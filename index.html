@@ -284,6 +284,18 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 /* Controls hint */
 #controls{position:absolute;bottom:10px;right:10px;z-index:20;color:rgba(255,255,255,.4);font-size:11px;text-align:right}
 
+/* Zoom controls */
+#zoomControls{position:absolute;bottom:90px;right:10px;z-index:20;display:flex;flex-direction:column;gap:4px}
+#zoomControls button{width:32px;height:32px;border-radius:6px;background:rgba(10,10,30,.7);
+  border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;font-weight:bold;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#zoomControls button:hover{background:rgba(255,209,102,.2);border-color:#ffd166}
+@media(pointer:coarse){
+  #zoomControls{bottom:calc(90px + env(safe-area-inset-bottom,0px));right:10px}
+  #zoomControls button{width:36px;height:36px}
+}
+
 /* Upgrade Shop Modal */
 #upgradeShop{position:absolute;inset:0;z-index:48;display:none;
   background:rgba(10,10,30,.95);color:#fff;flex-direction:column;align-items:center;
@@ -342,12 +354,12 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
   width:60px;height:60px;border-radius:50%;
   background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);
   font-size:22px;color:#fff;display:none;align-items:center;justify-content:center;
-  -webkit-tap-highlight-color:transparent;cursor:pointer;backdrop-filter:blur(4px)}
+  -webkit-tap-highlight-color:transparent;cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 #touchLeft{bottom:20px;left:20px}
 #touchRight{bottom:20px;left:100px}
 #touchAction{bottom:20px;right:20px;background:rgba(255,209,102,.2);border-color:rgba(255,209,102,.5)}
 #touchDance{bottom:20px;right:90px;background:rgba(239,71,111,.15);border-color:rgba(239,71,111,.4);font-size:18px}
-@media(hover:none)and(pointer:coarse){
+@media(pointer:coarse){
   #touchLeft,#touchRight,#touchAction,#touchDance{display:flex}
   #controls{display:none}
   #hud{font-size:10px;min-width:auto;padding:6px 8px;max-width:145px;line-height:1.5;top:env(safe-area-inset-top,8px);left:8px}
@@ -414,11 +426,15 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 <div id="timeHud" style="display:none"></div>
 <div id="moneyHud" style="display:none"><strong>💰</strong> <span id="hMoney">3000</span> ₺</div>
 <div id="zoneHud" style="display:none">📍 <span id="hZone">Home</span></div>
-<div id="controls">← → Move | ↑ or E: Interact | Space: Advance</div>
+<div id="controls">← → Move | ↑ or E: Interact | Space: Advance | +/−: Zoom | 0: Reset</div>
 <div id="touchLeft">&#9664;</div>
 <div id="touchRight">&#9654;</div>
 <div id="touchDance">&#128131;</div>
 <div id="touchAction">&#9757;</div>
+<div id="zoomControls">
+<button id="zoomInBtn" onclick="zoomIn()">+</button>
+<button id="zoomOutBtn" onclick="zoomOut()">&minus;</button>
+</div>
 
 <div id="travelOverlay">
 <div class="taxi-anim">🚕</div>
@@ -493,7 +509,8 @@ const S = {
   taxiFare: 20,
   ownedVehicle: null, // null or vehicle id
   inventory: [], // array of item objects
-  sprintEnergyTimer: 0
+  sprintEnergyTimer: 0,
+  zoom: 1 // camera zoom level
 };
 const timeSlots = ['Morning','Afternoon','Evening'];
 const timeEmojis = ['\u2600\uFE0F','\uD83C\uDF24\uFE0F','\uD83C\uDF19'];
@@ -1167,12 +1184,17 @@ function initPlayer() {
 function updateCamera() {
   const vw = window.innerWidth;
   const zoneW = zones[S.zone].width;
-  camX = S.x - vw / 2 + 20;
-  camX = Math.max(0, Math.min(camX, zoneW - vw));
-  worldEl.style.transform = 'translateX(' + (-camX) + 'px)';
+  camX = S.x - (vw / S.zoom) / 2 + 20;
+  camX = Math.max(0, Math.min(camX, zoneW - vw / S.zoom));
+  worldEl.style.transform = 'translateX(' + (-camX) + 'px) scale(' + S.zoom + ')';
+  worldEl.style.transformOrigin = '0 bottom';
   const mts = document.getElementById('mountains');
   if (mts) mts.style.transform = 'translateX(' + (-camX * 0.3) + 'px)';
 }
+
+function zoomIn() { S.zoom = Math.min(2, S.zoom + 0.1); updateCamera(); }
+function zoomOut() { S.zoom = Math.max(0.5, S.zoom - 0.1); updateCamera(); }
+function zoomReset() { S.zoom = 1; updateCamera(); }
 
 // ===== UPDATE HUD =====
 function updateHUD() {
@@ -1525,6 +1547,9 @@ document.addEventListener('keydown', e => {
     if (S.choicesOpen) closeChoices();
     if (S.dialogueOpen) closeDialogue();
   }
+  if (e.code === 'Equal' || e.code === 'NumpadAdd') { zoomIn(); e.preventDefault(); }
+  if (e.code === 'Minus' || e.code === 'NumpadSubtract') { zoomOut(); e.preventDefault(); }
+  if (e.code === 'Digit0' || e.code === 'Numpad0') { zoomReset(); e.preventDefault(); }
 });
 document.addEventListener('keyup', e => { keys[e.code] = false; });
 
@@ -1535,6 +1560,17 @@ function initTouch() {
   const ta = document.getElementById('touchAction');
   const td = document.getElementById('touchDance');
   if (!tl) return;
+
+  // Force show touch buttons on touch devices (iOS Safari fallback)
+  if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    tl.style.display = 'flex';
+    tr.style.display = 'flex';
+    ta.style.display = 'flex';
+    if (td) td.style.display = 'flex';
+    const ctrl = document.getElementById('controls');
+    if (ctrl) ctrl.style.display = 'none';
+  }
+
   // Prevent iOS scroll/bounce/zoom
   document.addEventListener('touchmove', e => { if(S.started) e.preventDefault(); }, {passive:false});
   document.addEventListener('gesturestart', e => { e.preventDefault(); });
