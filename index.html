@@ -1183,17 +1183,24 @@ function initPlayer() {
 // ===== CAMERA =====
 function updateCamera() {
   const vw = window.innerWidth;
+  const vh = window.innerHeight;
   const zoneW = zones[S.zone].width;
-  camX = S.x - (vw / S.zoom) / 2 + 20;
-  camX = Math.max(0, Math.min(camX, zoneW - vw / S.zoom));
-  worldEl.style.transform = 'translateX(' + (-camX) + 'px) scale(' + S.zoom + ')';
-  worldEl.style.transformOrigin = '0 bottom';
+  // Camera follows player - calculate in world space
+  camX = S.x - vw / (2 * S.zoom) + 20;
+  camX = Math.max(0, Math.min(camX, Math.max(0, zoneW - vw / S.zoom)));
+  // Apply zoom to the wrapper, translate to the world
+  const wrap = document.getElementById('worldWrap');
+  wrap.style.transform = 'scale(' + S.zoom + ')';
+  wrap.style.transformOrigin = 'center bottom';
+  wrap.style.width = (100 / S.zoom) + '%';
+  wrap.style.left = (50 - 50 / S.zoom) + '%';
+  worldEl.style.transform = 'translateX(' + (-camX) + 'px)';
   const mts = document.getElementById('mountains');
-  if (mts) mts.style.transform = 'translateX(' + (-camX * 0.3) + 'px)';
+  if (mts) mts.style.transform = 'translateX(' + (-camX * 0.3 * S.zoom) + 'px) scale(' + (0.8 + S.zoom * 0.2) + ')';
 }
 
-function zoomIn() { S.zoom = Math.min(2, S.zoom + 0.1); updateCamera(); }
-function zoomOut() { S.zoom = Math.max(0.5, S.zoom - 0.1); updateCamera(); }
+function zoomIn() { S.zoom = Math.min(2, +(S.zoom + 0.15).toFixed(2)); updateCamera(); }
+function zoomOut() { S.zoom = Math.max(0.5, +(S.zoom - 0.15).toFixed(2)); updateCamera(); }
 function zoomReset() { S.zoom = 1; updateCamera(); }
 
 // ===== UPDATE HUD =====
@@ -1571,10 +1578,36 @@ function initTouch() {
     if (ctrl) ctrl.style.display = 'none';
   }
 
-  // Prevent iOS scroll/bounce/zoom
-  document.addEventListener('touchmove', e => { if(S.started) e.preventDefault(); }, {passive:false});
-  document.addEventListener('gesturestart', e => { e.preventDefault(); });
-  document.addEventListener('gesturechange', e => { e.preventDefault(); });
+  // Prevent iOS scroll/bounce but allow pinch zoom
+  document.addEventListener('touchmove', e => {
+    if (S.started && e.touches.length < 2) e.preventDefault();
+  }, {passive:false});
+
+  // Pinch-to-zoom handling
+  let pinchStartDist = 0;
+  let pinchStartZoom = 1;
+  document.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchStartDist = Math.sqrt(dx*dx + dy*dy);
+      pinchStartZoom = S.zoom;
+    }
+  }, {passive:true});
+  document.addEventListener('touchmove', e => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const scale = dist / pinchStartDist;
+      S.zoom = Math.max(0.5, Math.min(2, +(pinchStartZoom * scale).toFixed(2)));
+      updateCamera();
+    }
+  }, {passive:false});
+  // Block Safari gesture events (they conflict with our pinch handler)
+  document.addEventListener('gesturestart', e => { e.preventDefault(); }, {passive:false});
+  document.addEventListener('gesturechange', e => { e.preventDefault(); }, {passive:false});
 
   tl.addEventListener('touchstart', e => { e.preventDefault(); keys['ArrowLeft']=true; checkDoubleTap('ArrowLeft'); }, {passive:false});
   tl.addEventListener('touchend', e => { e.preventDefault(); keys['ArrowLeft']=false; S.sprinting=false; }, {passive:false});
