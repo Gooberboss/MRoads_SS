@@ -185,9 +185,21 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:#1a1a2e;-w
 
 /* NPCs */
 .npc{position:absolute;bottom:130px;width:36px;height:50px;z-index:5;cursor:default}
-.npc .n-head{position:absolute;top:0;left:50%;transform:translateX(-50%);width:18px;height:18px;border-radius:50%;border:2px solid rgba(0,0,0,.2);overflow:visible}
+.npc .n-head{position:absolute;top:0;left:50%;transform:translateX(-50%);width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.15);overflow:hidden}
 .npc .n-body{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:22px;height:24px;border-radius:5px 5px 3px 3px}
-.npc .n-emoji{position:absolute;top:-2px;left:50%;transform:translateX(-50%);font-size:14px;z-index:1}
+/* NPC Face Features */
+.nf-eye{position:absolute;width:3px;height:3px;background:#1a1a1a;border-radius:50%;top:9px}
+.nf-eye-l{left:4px}.nf-eye-r{right:4px}
+.nf-mouth{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:2px;border-radius:0 0 3px 3px;background:#c0392b}
+.nf-mustache{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:8px;height:2px;border-radius:1px}
+/* Hair styles */
+.nf-hair{position:absolute;pointer-events:none}
+.nf-hair-short{top:0;left:0;right:0;height:7px;border-radius:9px 9px 0 0}
+.nf-hair-long{top:0;left:-2px;right:-2px;height:10px;border-radius:10px 10px 4px 4px}
+.nf-hair-long::after{content:'';position:absolute;bottom:-5px;left:0;width:4px;height:6px;background:inherit;border-radius:0 0 2px 2px}
+.nf-hair-bun{top:0;left:0;right:0;height:6px;border-radius:9px 9px 0 0}
+.nf-hair-bun::after{content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:7px;height:7px;background:inherit;border-radius:50%}
+.nf-hair-covered{top:-1px;left:-2px;right:-2px;height:12px;border-radius:10px 10px 2px 2px}
 .npc .n-name{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:#fff;
   background:rgba(0,0,0,.6);padding:1px 5px;border-radius:3px;white-space:nowrap;opacity:0;transition:opacity .3s}
 .npc.nearby .n-name{opacity:1}
@@ -283,18 +295,6 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 
 /* Controls hint */
 #controls{position:absolute;bottom:10px;right:10px;z-index:20;color:rgba(255,255,255,.4);font-size:11px;text-align:right}
-
-/* Zoom controls */
-#zoomControls{position:absolute;bottom:90px;right:10px;z-index:20;display:flex;flex-direction:column;gap:4px}
-#zoomControls button{width:32px;height:32px;border-radius:6px;background:rgba(10,10,30,.7);
-  border:1px solid rgba(255,255,255,.2);color:#fff;font-size:18px;font-weight:bold;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
-#zoomControls button:hover{background:rgba(255,209,102,.2);border-color:#ffd166}
-@media(pointer:coarse){
-  #zoomControls{bottom:calc(90px + env(safe-area-inset-bottom,0px));right:10px}
-  #zoomControls button{width:36px;height:36px}
-}
 
 /* Upgrade Shop Modal */
 #upgradeShop{position:absolute;inset:0;z-index:48;display:none;
@@ -431,10 +431,6 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 <div id="touchRight">&#9654;</div>
 <div id="touchDance">&#128131;</div>
 <div id="touchAction">&#9757;</div>
-<div id="zoomControls">
-<button id="zoomInBtn" onclick="zoomIn()">+</button>
-<button id="zoomOutBtn" onclick="zoomOut()">&minus;</button>
-</div>
 
 <div id="travelOverlay">
 <div class="taxi-anim">🚕</div>
@@ -458,19 +454,25 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 <button class="btn-p" style="margin-top:16px;padding:10px 28px" onclick="closeVehicleShop()">Close</button>
 </div>
 
-<div id="inventoryPanel" style="display:none;position:absolute;inset:0;z-index:48;background:rgba(10,10,30,.95);color:#fff;flex-direction:column;align-items:center;justify-content:flex-start;padding:30px;overflow-y:auto">
-<h2 style="font-size:1.6rem;color:#ffd166;margin-bottom:4px">&#127890; Inventory</h2>
-<h3 style="font-size:.9rem;color:#a8dadc;font-weight:normal;margin-bottom:16px">Your items — click to use</h3>
+<div id="inventoryPanel" style="display:none;position:absolute;inset:0;z-index:48;background:rgba(10,10,30,.95);color:#fff;flex-direction:column;align-items:center;padding:0;overflow:hidden">
+<div style="width:100%;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0">
+<div><h2 style="font-size:1.3rem;color:#ffd166;margin:0">&#127890; Inventory</h2><p style="font-size:.8rem;color:#a8dadc;margin:2px 0 0">Your items — tap to use</p></div>
+<button class="btn-p" style="padding:8px 18px;font-size:12px" onclick="closeInventory()">Close</button>
+</div>
+<div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 20px;width:100%;display:flex;flex-direction:column;align-items:center">
 <div class="upgrade-grid" id="invGrid"></div>
-<button class="btn-p" style="margin-top:16px;padding:10px 28px" onclick="closeInventory()">Close</button>
+</div>
 </div>
 
-<div id="shopPanel" style="display:none;position:absolute;inset:0;z-index:48;background:rgba(10,10,30,.95);color:#fff;flex-direction:column;align-items:center;justify-content:flex-start;padding:30px;overflow-y:auto">
-<h2 style="font-size:1.6rem;color:#ffd166;margin-bottom:4px">&#128722; Bazaar Shop</h2>
-<h3 style="font-size:.9rem;color:#a8dadc;font-weight:normal;margin-bottom:16px">Buy groceries and goods to carry</h3>
-<div id="shopBalance" style="margin:14px 0;font-size:14px;color:#eee"></div>
+<div id="shopPanel" style="display:none;position:absolute;inset:0;z-index:48;background:rgba(10,10,30,.95);color:#fff;flex-direction:column;align-items:center;padding:0;overflow:hidden">
+<div style="width:100%;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0">
+<div><h2 style="font-size:1.3rem;color:#ffd166;margin:0">&#128722; Bazaar Shop</h2><p style="font-size:.8rem;color:#a8dadc;margin:2px 0 0">Buy groceries and goods</p></div>
+<button class="btn-p" style="padding:8px 18px;font-size:12px" onclick="closeShop()">Close</button>
+</div>
+<div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 20px;width:100%;display:flex;flex-direction:column;align-items:center">
+<div id="shopBalance" style="margin:8px 0;font-size:14px;color:#eee"></div>
 <div class="upgrade-grid" id="shopGrid"></div>
-<button class="btn-p" style="margin-top:16px;padding:10px 28px" onclick="closeShop()">Close</button>
+</div>
 </div>
 
 <div id="dialogue"><div id="dSpeaker"></div><div id="dText"></div><div id="dTrust"></div><button class="btn-p" onclick="closeDialogue()">Continue</button></div>
@@ -636,7 +638,7 @@ const locData = {
 
 // ===== NPC DATA =====
 const npcData = [
-  {id:'npc0',name:'Mehmet',emoji:'\uD83D\uDC68',color:'#ffb703',x:250,zone:'city',wanderR:80,trust:0,interactions:0,
+  {id:'npc0',name:'Mehmet',emoji:'m',color:'#ffb703',skin:'#d4a574',hair:'#2c1810',hairStyle:'short',gender:'m',x:250,zone:'city',wanderR:80,trust:0,interactions:0,
     tiers:[
       {min:0,lines:['Mehmet glances at you curiously. "Merhaba. You are new here?"','Mehmet nods politely. "Welcome to the neighborhood."']},
       {min:15,lines:['"Ah, you again! Come, sit. Tea is ready."','"How is your Turkish coming? You are brave to try!"']},
@@ -652,7 +654,7 @@ const npcData = [
       {min:60,text:'Discuss faith openly',tG:15,e:-5,fG:10,result:'"Tell me more about \u0130sa," he says quietly.'},
       {min:80,text:'Pray together',tG:20,e:-3,fG:15,result:'A sacred moment of trust.'}
     ]},
-  {id:'npc1',name:'Elif',emoji:'\uD83D\uDC69',color:'#8ecae6',x:700,zone:'city',wanderR:60,trust:0,interactions:0,
+  {id:'npc1',name:'Elif',emoji:'f',color:'#8ecae6',skin:'#e8c4a0',hair:'#1a1a1a',hairStyle:'long',gender:'f',x:700,zone:'city',wanderR:60,trust:0,interactions:0,
     tiers:[
       {min:0,lines:['A young woman looks up from her book. "Oh, hello. Are you a teacher?"','Elif smiles shyly. "Your Turkish is... interesting."']},
       {min:15,lines:['"Can you help me practice English?"','"I like talking to you. You ask different questions."']},
@@ -668,7 +670,7 @@ const npcData = [
       {min:60,text:'Give her a book to read (-40\u20BA)',tG:16,e:-2,cost:40,fG:8,result:'She hides it in her bag. "I\'ll read it tonight."'},
       {min:80,text:'Study Scripture together',tG:20,e:-5,fG:15,result:'Her eyes widen. "This is beautiful."'}
     ]},
-  {id:'npc2',name:'Hasan Amca',emoji:'\uD83D\uDC74',color:'#ffafcc',x:620,zone:'home',wanderR:40,trust:0,interactions:0,
+  {id:'npc2',name:'Hasan Amca',emoji:'m',color:'#ffafcc',skin:'#c8a080',hair:'#cccccc',hairStyle:'bald',gender:'m',x:620,zone:'home',wanderR:40,trust:0,interactions:0,
     tiers:[
       {min:0,lines:['An old man sits on a bench, watching pigeons.','He nods slightly. Progress with elders takes time.']},
       {min:15,lines:['"Sit, sit." He offers sunflower seeds.','"You walk past every day. At least you are consistent."']},
@@ -684,7 +686,7 @@ const npcData = [
       {min:60,text:'Share about hope and eternity',tG:14,e:-4,fG:10,result:'"Hope. I haven\'t felt that in years."'},
       {min:80,text:'Read Scripture about eternal life',tG:18,e:-4,fG:15,result:'Tears form in his old eyes.'}
     ]},
-  {id:'npc3',name:'Ahmad',emoji:'\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67',color:'#a8e6cf',x:2550,zone:'city',wanderR:60,trust:0,interactions:0,
+  {id:'npc3',name:'Ahmad',emoji:'m',color:'#a8e6cf',skin:'#b8865c',hair:'#1a1a1a',hairStyle:'short',gender:'m',x:2550,zone:'city',wanderR:60,trust:0,interactions:0,
     tiers:[
       {min:0,lines:['A Syrian man looks at you warily.','He nods but keeps his distance.']},
       {min:15,lines:['"You helped at the center. Thank you."','"My children ask when you will come back."']},
@@ -700,7 +702,7 @@ const npcData = [
       {min:60,text:'Share your testimony',tG:15,e:-4,fG:10,result:'"Your story gives me hope."'},
       {min:80,text:'Study the Bible together',tG:20,e:-5,fG:15,result:'A house church is born.'}
     ]},
-  {id:'npc4',name:'Zeynep',emoji:'\uD83E\uDDD1',color:'#dda0dd',x:100,zone:'home',wanderR:50,trust:0,interactions:0,
+  {id:'npc4',name:'Zeynep',emoji:'f',color:'#dda0dd',skin:'#d4a574',hair:'#2c1810',hairStyle:'covered',gender:'f',x:100,zone:'home',wanderR:50,trust:0,interactions:0,
     tiers:[
       {min:0,lines:['"Are you the foreigner from upstairs? Sorry about the noise!"','She waves from her doorway.']},
       {min:15,lines:['"My children want to learn English!"','"I made too much b\u00F6rek. Please, take some."']},
@@ -716,7 +718,7 @@ const npcData = [
       {min:60,text:'Answer her faith questions',tG:16,e:-4,fG:10,result:'"No one has explained it like that before."'},
       {min:80,text:'Pray for her mother-in-law',tG:18,e:-3,fG:12,result:'"Your God heard us."'}
     ]},
-  {id:'npc5',name:'Deniz Hoca',emoji:'\uD83D\uDC69\u200D\uD83C\uDFEB',color:'#87ceeb',x:1200,zone:'city',wanderR:80,trust:0,interactions:0,
+  {id:'npc5',name:'Deniz Hoca',emoji:'f',color:'#87ceeb',skin:'#e8c4a0',hair:'#4a2c10',hairStyle:'bun',gender:'f',x:1200,zone:'city',wanderR:80,trust:0,interactions:0,
     tiers:[
       {min:0,lines:['"Merhaba! You must be the new student. Turkish is hard but rewarding."','"Practice every day. Sab\u0131r \u2014 patience!"']},
       {min:15,lines:['"Your pronunciation is improving!"','"Most foreigners give up. You are different."']},
@@ -732,7 +734,7 @@ const npcData = [
       {min:60,text:'Discuss meaning and purpose',tG:16,e:-4,fG:10,result:'"You teach something deeper."'},
       {min:80,text:'Give her a Turkish New Testament (-30\u20BA)',tG:18,e:-2,fG:12,cost:30,result:'"I will read this. I promise."'}
     ]},
-  {id:'npc6',name:'Ay\u015Fe',emoji:'\uD83E\uDDD3',color:'#f0e68c',x:2050,zone:'city',wanderR:90,trust:0,interactions:0,
+  {id:'npc6',name:'Ay\u015Fe',emoji:'f',color:'#f0e68c',skin:'#d4a574',hair:'#888888',hairStyle:'short',gender:'f',x:2050,zone:'city',wanderR:90,trust:0,interactions:0,
     tiers:[
       {min:0,lines:['A woman walks her dog in the park. She smiles politely.','"Nice day for a walk, isn\'t it?"']},
       {min:15,lines:['"I see you here often. Do you live nearby?"','"I work at the university."']},
@@ -780,6 +782,32 @@ const dialogueEl = document.getElementById('dialogue');
 const choicesEl = document.getElementById('choices');
 const journalEl = document.getElementById('journal');
 const travelOverlay = document.getElementById('travelOverlay');
+
+// ===== NPC FACE BUILDER =====
+function buildNpcFace(n) {
+  let hair = '';
+  switch(n.hairStyle) {
+    case 'short':
+      hair = '<div class="nf-hair nf-hair-short" style="background:'+n.hair+'"></div>';
+      break;
+    case 'long':
+      hair = '<div class="nf-hair nf-hair-long" style="background:'+n.hair+'"></div>';
+      break;
+    case 'bun':
+      hair = '<div class="nf-hair nf-hair-bun" style="background:'+n.hair+'"></div>';
+      break;
+    case 'covered':
+      hair = '<div class="nf-hair nf-hair-covered" style="background:'+n.color+'"></div>';
+      break;
+    case 'bald':
+      hair = '';
+      break;
+  }
+  const mustache = (n.gender === 'm' && n.hairStyle !== 'bald') ? '<div class="nf-mustache" style="background:'+n.hair+'"></div>' : '';
+  return hair +
+    '<div class="nf-eye nf-eye-l"></div><div class="nf-eye nf-eye-r"></div>'+
+    '<div class="nf-mouth"></div>' + mustache;
+}
 
 // ===== APARTMENT CROSS-SECTION BUILDER =====
 function buildApartmentCrossSection() {
@@ -902,7 +930,7 @@ function loadZone(zone) {
     el.id = n.id;
     el.style.left = n.x + 'px';
     el.innerHTML = '<span class="n-name">'+n.name+'</span><div class="n-shadow"></div>'+
-      '<div class="n-head" style="background:'+n.color+'"><span class="n-emoji">'+n.emoji+'</span></div>'+
+      '<div class="n-head" style="background:'+n.skin+'">'+buildNpcFace(n)+'</div>'+
       '<div class="n-body" style="background:'+n.color+'"></div>'+
       '<div class="n-trust"><div class="n-trust-fill" style="width:'+n.trust+'%"></div></div>';
     nContainer.appendChild(el);
@@ -1494,7 +1522,7 @@ function checkDoubleTap(code, isRepeat) {
 
 // ===== GAME LOOP =====
 function gameLoop() {
-  if (!S.started || S.dialogueOpen || S.choicesOpen || S.traveling) {
+  if (!S.started || S.traveling) {
     requestAnimationFrame(gameLoop);
     return;
   }
@@ -1529,6 +1557,17 @@ function gameLoop() {
   updateCamera();
   updateNpcs();
   checkProximity();
+  // Auto-close dialogue/choices after player walks ~80px away
+  if ((S.dialogueOpen || S.choicesOpen) && Math.abs(S.vx) > 0.5) {
+    S._walkCloseDist = (S._walkCloseDist || 0) + Math.abs(S.vx);
+    if (S._walkCloseDist > 80) {
+      if (S.dialogueOpen) closeDialogue();
+      if (S.choicesOpen) closeChoices();
+      S._walkCloseDist = 0;
+    }
+  } else if (!S.dialogueOpen && !S.choicesOpen) {
+    S._walkCloseDist = 0;
+  }
   requestAnimationFrame(gameLoop);
 }
 
@@ -1560,6 +1599,14 @@ document.addEventListener('keydown', e => {
 });
 document.addEventListener('keyup', e => { keys[e.code] = false; });
 
+// Mouse wheel zoom
+document.addEventListener('wheel', e => {
+  if (!S.started) return;
+  e.preventDefault();
+  if (e.deltaY < 0) zoomIn();
+  else zoomOut();
+}, {passive:false});
+
 // ===== TOUCH CONTROLS =====
 function initTouch() {
   const tl = document.getElementById('touchLeft');
@@ -1578,9 +1625,14 @@ function initTouch() {
     if (ctrl) ctrl.style.display = 'none';
   }
 
-  // Prevent iOS scroll/bounce but allow pinch zoom
+  // Prevent iOS scroll/bounce but allow scrolling inside panels and pinch zoom
   document.addEventListener('touchmove', e => {
-    if (S.started && e.touches.length < 2) e.preventDefault();
+    if (S.started && e.touches.length < 2) {
+      // Allow scrolling inside overlay panels
+      const t = e.target;
+      if (t.closest('#shopPanel,#inventoryPanel,#upgradeShop,#vehicleShop,#endScreen')) return;
+      e.preventDefault();
+    }
   }, {passive:false});
 
   // Pinch-to-zoom handling
