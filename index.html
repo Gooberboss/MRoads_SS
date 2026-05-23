@@ -172,6 +172,10 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:#1a1a2e;-w
 @keyframes stepR{from{transform:translateY(-4px)}to{transform:translateY(0)}}
 @keyframes breathe{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-1px)}}
 @keyframes runLean{from{transform:translateX(-50%) rotate(-3deg)}to{transform:translateX(-50%) rotate(3deg)}}
+/* Riding vehicle */
+#playerEl.riding{bottom:104px}
+#playerEl.riding .p-feet{display:none}
+#playerEl.riding .p-body{animation:none}
 /* Dancing */
 #playerEl.dancing .p-body{animation:danceBody .3s infinite alternate ease-in-out}
 #playerEl.dancing .p-head{animation:danceHead .6s infinite alternate ease-in-out}
@@ -223,7 +227,7 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:#1a1a2e;-w
 #hud hr{border:none;border-top:1px solid rgba(255,255,255,.15);margin:6px 0}
 .pbar{height:5px;background:rgba(255,255,255,.1);border-radius:3px;margin-top:3px;overflow:hidden}
 .pfill{height:100%;border-radius:3px;transition:width .4s}
-.f-energy{background:#06d6a0}.f-hunger{background:#ff8c42}.f-lang{background:#118ab2}.f-trust{background:#ffd166}.f-faith{background:#ef476f}
+.f-energy{background:#06d6a0}.f-hunger{background:#ff8c42}.f-health{background:#e74c3c}.f-lang{background:#118ab2}.f-trust{background:#ffd166}.f-faith{background:#ef476f}
 #timeHud{position:absolute;top:10px;right:10px;z-index:20;background:rgba(10,10,30,.88);color:#ffd166;
   padding:8px 14px;border-radius:10px;font-size:13px;font-weight:bold;
   border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(6px)}
@@ -429,18 +433,18 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 </div></div>
 
 <div id="hud" style="display:none">
-<div><strong>Day:</strong> <span id="hDay">1</span>/28 &nbsp;<strong>Time:</strong> <span id="hTime">Morning</span></div>
+<div><strong>Day:</strong> <span id="hDay">1</span> &nbsp;<strong>Time:</strong> <span id="hTime">Morning</span></div>
 <div><strong>Energy:</strong> <span id="hEnergy">100</span><div class="pbar"><div class="pfill f-energy" id="bEnergy" style="width:100%"></div></div></div>
 <div><strong>Hunger:</strong> <span id="hHunger">100</span><div class="pbar"><div class="pfill f-hunger" id="bHunger" style="width:100%"></div></div></div>
+<div><strong>Health:</strong> <span id="hHealth">100</span><div class="pbar"><div class="pfill f-health" id="bHealth" style="width:100%"></div></div></div>
 <div><strong>Turkish:</strong> <span id="hLang">0</span>%<div class="pbar"><div class="pfill f-lang" id="bLang" style="width:0%"></div></div></div>
-<div><strong>Trust:</strong> <span id="hTrust">0</span><div class="pbar"><div class="pfill f-trust" id="bTrust" style="width:0%"></div></div></div>
 <div><strong>Faith:</strong> <span id="hFaith">50</span><div class="pbar"><div class="pfill f-faith" id="bFaith" style="width:50%"></div></div></div>
 <div><strong>Helped:</strong> <span id="hHelped">0</span></div>
 <hr><div id="mission" style="color:#a8dadc;font-style:italic;font-size:11px">Build relationships one conversation at a time.</div>
 <button id="invBtn" onclick="openInventory()" style="margin-top:5px;padding:4px 10px;font-size:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#a8dadc;border-radius:5px;width:100%;cursor:pointer">&#127890; Inventory (<span id="hInvCount">0</span>)</button>
 </div>
 <div id="timeHud" style="display:none"></div>
-<div id="moneyHud" style="display:none"><strong>💰</strong> <span id="hMoney">3000</span> ₺</div>
+<div id="moneyHud" style="display:none"><strong>💰</strong> <span id="hMoney">500</span> ₺</div>
 <div id="zoneHud" style="display:none">📍 <span id="hZone">Home</span></div>
 <div id="controls">← → Move | ↑ or E: Interact | Space: Advance | +/−: Zoom | 0: Reset</div>
 <div id="touchLeft">&#9664;</div>
@@ -528,9 +532,9 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 <script>
 // ===== GAME STATE =====
 const S = {
-  x: 200, vx: 0, speed: 4, sprintSpeed: 8, sprinting: false,
-  energy: 100, hunger: 100, language: 0, trust: 0, faith: 50, helped: 0,
-  money: 3000, day: 1, maxDays: 28,
+  x: 200, vx: 0, speed: 2.5, sprintSpeed: 5, sprinting: false,
+  energy: 100, hunger: 100, health: 100, language: 0, trust: 0, faith: 50, helped: 0,
+  money: 500, day: 1, maxDays: 28,
   timeSlot: 0, actionsThisSlot: 0, maxActions: 2,
   started: false, dialogueOpen: false, choicesOpen: false,
   facing: 'right', moving: false,
@@ -538,6 +542,8 @@ const S = {
   traveling: false,
   taxiFare: 20,
   ownedVehicle: null, // null or vehicle id
+  riding: false, // currently in vehicle
+  vehicleX: 0, // parked vehicle position
   inventory: [], // array of item objects
   sprintEnergyTimer: 0,
   zoom: 1 // camera zoom level
@@ -549,7 +555,7 @@ let camX = 0;
 
 // Zone configs
 const zones = {
-  home: { width: 1100, startX: 250 },
+  home: { width: 1400, startX: 250 },
   city: { width: 4400, startX: 200 }
 };
 
@@ -571,7 +577,7 @@ const buildingsCity = [
 
 // Taxi stands (multiple per zone)
 const taxiStands = {
-  home: [{x:880, label:'Taxi to City Center (-20\u20BA)'}],
+  home: [{x:1100, label:'Taxi to City Center (-20\u20BA)'}],
   city: [{x:100, label:'Taxi Home (-20\u20BA)'},{x:4000, label:'Taxi Home (-20\u20BA)'}]
 };
 
@@ -614,7 +620,7 @@ const shopItems = {
 const locData = {
   apartment:{title:'Back at home...',choices:[
     {text:'Pray and read the Bible',effect:()=>{const b=apartmentUpgrades.prayerCorner.owned?apartmentUpgrades.prayerCorner.faithBonus:0;S.faith+=20+b;S.energy+=15},result:'Faithfulness in quiet moments matters deeply.'},
-    {text:'Rest and recharge',effect:()=>{const b=apartmentUpgrades.rug.owned?apartmentUpgrades.rug.energyBonus:0;S.energy=Math.min(100,S.energy+35+b)},result:'The work here is a marathon, not a sprint.'},
+    {text:'Rest and recharge',effect:()=>{S.energy=100},result:'The work here is a marathon, not a sprint.'},
     {text:'Eat a meal',effect:()=>{eatFromInventory()},result:''},
     {text:'Video call supporters',effect:()=>{S.faith+=10;S.energy+=10;checkDonation()},result:'Encouragement from home refuels the soul.'},
     {text:'\uD83D\uDECB\uFE0F Upgrade Home',effect:()=>{openUpgradeShop()},result:''},
@@ -664,9 +670,9 @@ const locData = {
     {text:'Just looking around',effect:()=>{S.energy-=2},result:'The salesman nods. "Take your time, friend."'}
   ]},
   hospital:{title:'At the Hospital...',choices:[
-    {text:'Rest in waiting room (+10 energy)',effect:()=>{S.energy=Math.min(100,S.energy+10)},result:'You sit and rest for a while. A little energy returns.'},
-    {text:'See a doctor (-200\u20BA, full energy)',effect:()=>{S.money-=200;S.energy=100;S.hunger=Math.min(100,S.hunger+30)},result:'The doctor checks you over. "Rest more, eat well." You feel fully restored.'},
-    {text:'Buy medicine (-50\u20BA, +30 energy)',effect:()=>{S.money-=50;S.energy=Math.min(100,S.energy+30)},result:'Some vitamins and rest. You feel better.'},
+    {text:'Rest in waiting room (+10 energy, +10 health)',effect:()=>{S.energy=Math.min(100,S.energy+10);S.health=Math.min(100,S.health+10)},result:'You sit and rest for a while. A little energy returns.'},
+    {text:'See a doctor (-200\u20BA, full health & energy)',effect:()=>{S.money-=200;S.energy=100;S.health=100;S.hunger=Math.min(100,S.hunger+30)},result:'The doctor checks you over. "Rest more, eat well." You feel fully restored.'},
+    {text:'Buy medicine (-50\u20BA, +30 health)',effect:()=>{S.money-=50;S.health=Math.min(100,S.health+30);S.energy=Math.min(100,S.energy+15)},result:'Some vitamins and rest. You feel better.'},
     {text:'Leave',effect:()=>{},result:''}
   ]}
 };
@@ -684,8 +690,8 @@ const npcData = [
     choices:[
       {min:0,text:'Greet him warmly',tG:5,e:-2,result:'You exchange pleasantries. Small steps.'},
       {min:0,text:'Ask about his day',tG:8,e:-3,result:'He tells you about his shop. Listening builds connection.'},
-      {min:20,text:'Share a meal together (-30\u20BA)',tG:12,e:-5,cost:30,result:'Over kebab, the conversation deepens.'},
-      {min:40,text:'Accept his dinner invitation',tG:18,e:-8,result:'His wife made mant\u0131. The whole family welcomes you.'},
+      {min:20,text:'Share a meal together (-30\u20BA)',tG:12,e:-5,cost:30,hunG:25,result:'Over kebab, the conversation deepens.'},
+      {min:40,text:'Accept his dinner invitation',tG:18,e:-8,hunG:35,result:'His wife made mant\u0131. The whole family welcomes you.'},
       {min:60,text:'Discuss faith openly',tG:15,e:-5,fG:10,result:'"Tell me more about \u0130sa," he says quietly.'},
       {min:80,text:'Pray together',tG:20,e:-3,fG:15,result:'A sacred moment of trust.'}
     ]},
@@ -700,7 +706,7 @@ const npcData = [
     choices:[
       {min:0,text:'Help her with English',tG:6,e:-3,result:'You correct her pronunciation gently.'},
       {min:0,text:'Ask about her studies',tG:7,e:-2,result:'She lights up talking about literature.'},
-      {min:20,text:'Share a coffee (-20\u20BA)',tG:10,e:-4,cost:20,result:'Over Turkish coffee, she opens up.'},
+      {min:20,text:'Share a coffee (-20\u20BA)',tG:10,e:-4,cost:20,hunG:15,result:'Over Turkish coffee, she opens up.'},
       {min:40,text:'Discuss worldviews carefully',tG:14,e:-5,fG:5,result:'She asks thoughtful questions.'},
       {min:60,text:'Give her a book to read (-40\u20BA)',tG:16,e:-2,cost:40,fG:8,result:'She hides it in her bag. "I\'ll read it tonight."'},
       {min:80,text:'Study Scripture together',tG:20,e:-5,fG:15,result:'Her eyes widen. "This is beautiful."'}
@@ -717,7 +723,7 @@ const npcData = [
       {min:0,text:'Sit quietly beside him',tG:5,e:-2,result:'Sometimes presence is enough.'},
       {min:0,text:'Offer to buy him tea (-10\u20BA)',tG:7,e:-2,cost:10,result:'"You have manners. Good."'},
       {min:20,text:'Ask about his life story',tG:10,e:-5,result:'His eyes grow distant remembering.'},
-      {min:40,text:'Visit his home for \u00E7ay',tG:15,e:-8,result:'His wife fusses over you. The b\u00F6rek is incredible.'},
+      {min:40,text:'Visit his home for \u00E7ay',tG:15,e:-8,hunG:30,result:'His wife fusses over you. The b\u00F6rek is incredible.'},
       {min:60,text:'Share about hope and eternity',tG:14,e:-4,fG:10,result:'"Hope. I haven\'t felt that in years."'},
       {min:80,text:'Read Scripture about eternal life',tG:18,e:-4,fG:15,result:'Tears form in his old eyes.'}
     ]},
@@ -749,7 +755,7 @@ const npcData = [
       {min:0,text:'Chat in the hallway',tG:5,e:-2,result:'Neighborly bonds form slowly.'},
       {min:0,text:'Help with groceries',tG:7,e:-3,result:'She insists on giving you tea in return.'},
       {min:20,text:'Teach her kids English',tG:12,e:-6,hG:1,result:'The children adore you.'},
-      {min:40,text:'Accept her \u00E7ay invitation',tG:14,e:-5,result:'Over three cups of tea, real friendship.'},
+      {min:40,text:'Accept her \u00E7ay invitation',tG:14,e:-5,hunG:20,result:'Over three cups of tea, real friendship.'},
       {min:60,text:'Answer her faith questions',tG:16,e:-4,fG:10,result:'"No one has explained it like that before."'},
       {min:80,text:'Pray for her mother-in-law',tG:18,e:-3,fG:12,result:'"Your God heard us."'}
     ]},
@@ -765,7 +771,7 @@ const npcData = [
       {min:0,text:'Practice Turkish together',tG:6,e:-4,lG:8,result:'She corrects you patiently.'},
       {min:0,text:'Ask for study tips',tG:5,e:-2,lG:5,result:'"Watch Turkish TV shows."'},
       {min:20,text:'Share why you came to Turkey',tG:12,e:-3,fG:5,result:'"That is a beautiful reason to be here."'},
-      {min:40,text:'Accept dinner invitation',tG:15,e:-6,result:'Incredible lentil soup. Warm laughter.'},
+      {min:40,text:'Accept dinner invitation',tG:15,e:-6,hunG:35,result:'Incredible lentil soup. Warm laughter.'},
       {min:60,text:'Discuss meaning and purpose',tG:16,e:-4,fG:10,result:'"You teach something deeper."'},
       {min:80,text:'Give her a Turkish New Testament (-30\u20BA)',tG:18,e:-2,fG:12,cost:30,result:'"I will read this. I promise."'}
     ]},
@@ -780,7 +786,7 @@ const npcData = [
     choices:[
       {min:0,text:'Walk together in the park',tG:6,e:-3,result:'She points out her favorite spots.'},
       {min:0,text:'Ask about her work',tG:5,e:-2,result:'She teaches sociology.'},
-      {min:20,text:'Meet for coffee (-25\u20BA)',tG:10,e:-4,cost:25,result:'She shares her doubts about life.'},
+      {min:20,text:'Meet for coffee (-25\u20BA)',tG:10,e:-4,cost:25,hunG:15,result:'She shares her doubts about life.'},
       {min:40,text:'Share your story of faith',tG:14,e:-4,fG:8,result:'"How do you know it is real?"'},
       {min:60,text:'Introduce her to other believers',tG:16,e:-5,fG:10,result:'"I am not alone," she whispers.'},
       {min:80,text:'Disciple her in faith',tG:20,e:-6,fG:18,result:'She prays for the first time. Tears of joy.'}
@@ -789,7 +795,7 @@ const npcData = [
 
 // ===== DAY EVENTS =====
 const dayEvents = {
-  1:'Spring in Istanbul. You have 3,000\u20BA. Take a taxi to the city center to start building relationships.',
+  1:'Spring in Istanbul. You have 500\u20BA. Take a taxi to the city center to start building relationships.',
   2:'A neighbor smiled at you. Small signs of acceptance.',
   3:'Rain patters on the cobblestones. A good day for tea indoors.',
   5:'The rain clears. A family invited you for dinner.',
@@ -1099,7 +1105,7 @@ function showTravelChoices(destination) {
 
 function travelWithVehicle(destination) {
   S.traveling = true;
-  S.energy -= 2;
+  S.energy = Math.max(0, S.energy - 2);
   const v = vehicles[S.ownedVehicle];
   updateHUD();
   travelOverlay.style.display = 'flex';
@@ -1123,7 +1129,7 @@ function travelTo(destination) {
   }
   S.traveling = true;
   S.money -= S.taxiFare;
-  S.energy -= 3;
+  S.energy = Math.max(0, S.energy - 3);
   updateHUD();
   travelOverlay.style.display = 'flex';
   const destName = destination === 'city' ? 'City Center' : 'Home';
@@ -1179,11 +1185,12 @@ function buyVehicle(key) {
   }
   S.money -= v.cost;
   S.ownedVehicle = key;
+  // Park vehicle in front of dealership (x:3000)
+  S.vehicleX = 3050;
   updateHUD();
   renderVehicleGrid();
-  // Refresh home zone to show parked vehicle
-  if (S.zone === 'home') showParkedVehicle();
-  showJournal('\uD83D\uDE97 You bought a ' + v.name + '! No more taxi fares.');
+  if (S.zone === 'city') showParkedVehicle();
+  showJournal('\uD83D\uDE97 You bought a ' + v.name + '! It\'s parked outside the dealership.');
 }
 
 function sellVehicle() {
@@ -1223,7 +1230,7 @@ function showParkedVehicle() {
   // Remove old parked vehicle
   const old = worldEl.querySelector('.parked-vehicle');
   if (old) old.remove();
-  if (!S.ownedVehicle) return;
+  if (!S.ownedVehicle || S.riding) return;
   const v = vehicles[S.ownedVehicle];
   const el = document.createElement('div');
   el.className = 'parked-vehicle';
@@ -1236,8 +1243,108 @@ function showParkedVehicle() {
       '<div class="pv-wheel pv-wh-f"></div><div class="pv-wheel pv-wh-r"></div>'+
       '</div>';
   }
-  el.style.left = '420px';
+  el.style.left = (S.vehicleX || 420) + 'px';
   worldEl.appendChild(el);
+}
+
+function mountVehicle() {
+  if (!S.ownedVehicle || S.riding) return;
+  S.riding = true;
+  // Hide player feet, show riding state
+  playerEl.style.bottom = '104px';
+  // Move vehicle to player position
+  const pv = worldEl.querySelector('.parked-vehicle');
+  if (pv) pv.style.left = (S.x - 8) + 'px';
+  showJournal('You got in your ' + vehicles[S.ownedVehicle].name + '. Drive to the edge to change zones!');
+  updateHUD();
+}
+
+function dismountVehicle() {
+  if (!S.riding) return;
+  S.riding = false;
+  S.vehicleX = S.x - 8;
+  playerEl.style.bottom = '130px';
+  // Park vehicle at current position
+  const pv = worldEl.querySelector('.parked-vehicle');
+  if (pv) pv.style.left = S.vehicleX + 'px';
+  showJournal('Parked your ' + vehicles[S.ownedVehicle].name + '.');
+}
+
+function loadZoneRiding(zone, playerX) {
+  // Load new zone but keep riding state
+  S.zone = zone;
+  const zoneW = zones[zone].width;
+  worldEl.style.width = zoneW + 'px';
+  bContainer.innerHTML = '';
+  nContainer.innerHTML = '';
+  worldEl.querySelectorAll('.taxi-stand,.deco-tree,.deco-lamp,.deco-cat,.parked-vehicle').forEach(e=>e.remove());
+  // Load buildings
+  const bList = zone === 'home' ? buildingsHome : buildingsCity;
+  bList.forEach(b => {
+    const el = document.createElement('div');
+    el.className = 'building';
+    el.id = b.id;
+    el.style.cssText = 'left:'+b.x+'px;width:'+b.w+'px;height:'+b.h+'px;background:'+b.color;
+    let details = getBuildingDetails(b.id);
+    if (b.id === 'apartment') {
+      el.innerHTML = details + '<span class="apt-label">'+b.name+'</span>';
+    } else {
+      el.innerHTML = '<span class="enter-hint">\u2191 Enter</span>'+details+b.emoji+'<br>'+b.name+'<span class="blabel">'+b.sub+'</span>';
+    }
+    bContainer.appendChild(el);
+  });
+  // Load taxi stands
+  const tsList = taxiStands[zone];
+  tsList.forEach((ts, i) => {
+    const taxiEl = document.createElement('div');
+    taxiEl.className = 'taxi-stand';
+    taxiEl.dataset.taxiIdx = i;
+    taxiEl.style.left = ts.x + 'px';
+    taxiEl.innerHTML = '<span class="enter-hint">\u2191 Take Taxi</span>\uD83D\uDE95<br><span class="blabel">'+ts.label+'</span>';
+    worldEl.appendChild(taxiEl);
+  });
+  // Load NPCs
+  npcData.filter(n => n.zone === zone).forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'npc idle';
+    el.id = n.id;
+    el.style.left = n.x + 'px';
+    el.innerHTML = '<span class="n-name">'+n.name+'</span><div class="n-shadow"></div>'+
+      '<div class="n-head" style="background:'+n.skin+'">'+buildNpcFace(n)+'</div>'+
+      '<div class="n-body" style="background:'+n.color+'"></div>'+
+      '<div class="n-trust"><div class="n-trust-fill" style="width:'+n.trust+'%"></div></div>';
+    nContainer.appendChild(el);
+    n.el = el;
+    n.curX = n.x;
+    n.targetX = n.x;
+    n.wanderTimer = Math.random() * 200;
+  });
+  // Decorations
+  if (zone === 'city') initCityDecorations();
+  else initHomeDecorations();
+  // Set player position (keep riding)
+  S.x = playerX;
+  playerEl.style.left = S.x + 'px';
+  playerEl.style.bottom = '104px';
+  playerEl.className = 'riding';
+  // Show vehicle at player position
+  const v = vehicles[S.ownedVehicle];
+  const vel = document.createElement('div');
+  vel.className = 'parked-vehicle';
+  if (v.type === 'scooter') {
+    vel.innerHTML = '<div class="pv-scooter" style="background:'+v.color+'"></div>';
+  } else {
+    vel.innerHTML = '<div class="pv-car"><div class="pv-body" style="background:'+v.color+'"></div>'+
+      '<div class="pv-roof" style="background:'+v.color+';filter:brightness(.85)"></div>'+
+      '<div class="pv-win-f"></div><div class="pv-win-r"></div>'+
+      '<div class="pv-wheel pv-wh-f"></div><div class="pv-wheel pv-wh-r"></div>'+
+      '</div>';
+  }
+  vel.style.left = (S.x - 8) + 'px';
+  worldEl.appendChild(vel);
+  updateCamera();
+  document.getElementById('hZone').textContent = zone === 'home' ? 'Home' : 'City Center';
+  requestAnimationFrame(gameLoop);
 }
 
 // ===== INIT PLAYER =====
@@ -1277,15 +1384,15 @@ function updateHUD() {
   document.getElementById('hTime').textContent = timeSlots[S.timeSlot];
   document.getElementById('hEnergy').textContent = Math.round(S.energy);
   document.getElementById('hHunger').textContent = Math.round(S.hunger);
+  document.getElementById('hHealth').textContent = Math.round(S.health);
   document.getElementById('hLang').textContent = Math.min(100, Math.round(S.language));
-  document.getElementById('hTrust').textContent = Math.round(S.trust);
   document.getElementById('hFaith').textContent = Math.round(S.faith);
   document.getElementById('hHelped').textContent = S.helped;
   document.getElementById('hMoney').textContent = S.money;
   document.getElementById('bEnergy').style.width = S.energy + '%';
   document.getElementById('bHunger').style.width = S.hunger + '%';
+  document.getElementById('bHealth').style.width = S.health + '%';
   document.getElementById('bLang').style.width = Math.min(100, S.language) + '%';
-  document.getElementById('bTrust').style.width = Math.min(100, S.trust) + '%';
   document.getElementById('bFaith').style.width = Math.min(100, S.faith) + '%';
   timeHud.textContent = timeEmojis[S.timeSlot] + ' ' + timeSlots[S.timeSlot];
   sky.className = S.timeSlot === 0 ? 'sky-morning' : S.timeSlot === 1 ? 'sky-afternoon' : 'sky-evening';
@@ -1314,7 +1421,6 @@ function advanceTime() {
 
 function advanceDay() {
   S.day++;
-  if (S.day > S.maxDays) { endGame(); return; }
   S.timeSlot = 0;
   S.actionsThisSlot = 0;
   npcData.forEach(n => n.talkedToday = false);
@@ -1323,6 +1429,69 @@ function advanceDay() {
   updateHUD();
   if (dayEvents[S.day]) showJournal(dayEvents[S.day]);
   updateWeather();
+  // Random disaster events (chance increases over time)
+  if (S.day > 3 && Math.random() < 0.15) {
+    setTimeout(() => { triggerDisaster(); }, 2000);
+  }
+}
+
+// ===== DISASTER EVENTS =====
+function triggerDisaster() {
+  const events = ['theft','illness','inspection'];
+  const event = events[Math.floor(Math.random() * events.length)];
+  switch(event) {
+    case 'theft':
+      disasterTheft();
+      break;
+    case 'illness':
+      disasterIllness();
+      break;
+    case 'inspection':
+      disasterInspection();
+      break;
+  }
+}
+
+function disasterTheft() {
+  const stolenMoney = Math.min(S.money, 50 + Math.floor(Math.random() * 100));
+  const stolenItems = Math.min(S.inventory.length, Math.floor(Math.random() * 2));
+  S.money -= stolenMoney;
+  S.faith = Math.max(0, S.faith - 8);
+  for (let i = 0; i < stolenItems; i++) {
+    S.inventory.pop();
+  }
+  document.getElementById('hInvCount').textContent = S.inventory.length;
+  updateHUD();
+  S.dialogueOpen = true;
+  dialogueEl.style.display = 'block';
+  document.getElementById('dSpeaker').textContent = '\u26A0\uFE0F ROBBERY';
+  document.getElementById('dText').textContent = 'You were pickpocketed on the street! Lost ' + stolenMoney + '\u20BA' + (stolenItems > 0 ? ' and ' + stolenItems + ' item(s)' : '') + '. The city can be dangerous. Stay alert.';
+  document.getElementById('dTrust').textContent = 'Faith -8';
+}
+
+function disasterIllness() {
+  S.health = Math.max(10, S.health - 30);
+  S.energy = Math.max(5, S.energy - 25);
+  S.faith = Math.max(0, S.faith - 6);
+  updateHUD();
+  S.dialogueOpen = true;
+  dialogueEl.style.display = 'block';
+  document.getElementById('dSpeaker').textContent = '\uD83E\uDE7A ILLNESS';
+  document.getElementById('dText').textContent = 'You woke up feeling terrible — fever, chills, and weakness. The unfamiliar food or water may be the cause. Visit the hospital if it gets worse.';
+  document.getElementById('dTrust').textContent = 'Health -30 | Energy -25 | Faith -6';
+}
+
+function disasterInspection() {
+  S.energy = Math.max(0, S.energy - 20);
+  S.faith = Math.max(0, S.faith - 10);
+  S.actionsThisSlot = S.maxActions; // lose the morning
+  S.timeSlot = Math.min(2, S.timeSlot + 1);
+  updateHUD();
+  S.dialogueOpen = true;
+  dialogueEl.style.display = 'block';
+  document.getElementById('dSpeaker').textContent = '\uD83D\uDCCB GOVERNMENT INSPECTION';
+  document.getElementById('dText').textContent = 'Police officers arrived at your door early this morning. "Passport and visa, please." Hours of questioning about your activities, your contacts, why you are really here. They leave without charges, but the morning is gone.';
+  document.getElementById('dTrust').textContent = 'Energy -20 | Faith -10 | Lost time slot';
 }
 
 // ===== WEATHER =====
@@ -1419,7 +1588,7 @@ function executeChoice(c) {
 
 // ===== INTERACT WITH BUILDING =====
 function interactBuilding(b) {
-  if (S.energy <= 0) { showJournal('You are too tired. Go home and rest.'); return; }
+  if (S.energy <= 0 && b.id !== 'apartment' && b.id !== 'hospital') { showJournal('You are too tired. Go home and rest.'); return; }
   const loc = locData[b.id];
   if (!loc) return;
   const available = loc.choices.filter(c => !(c.cost && S.money < c.cost));
@@ -1457,6 +1626,7 @@ function showNpcChoices(npc) {
       if (c.cost) S.money -= c.cost;
       if (c.hG) S.helped += c.hG;
       if (c.lG) S.language += c.lG;
+      if (c.hunG) S.hunger = Math.min(100, S.hunger + c.hunG);
       S.energy = Math.max(0, S.energy);
       S.faith = Math.max(0, Math.min(100, S.faith));
       S.language = Math.min(100, S.language);
@@ -1466,9 +1636,56 @@ function showNpcChoices(npc) {
       advanceTime();
     }};
   });
+  // Add conversion option if trust is 100 and not yet converted
+  if (npc.trust >= 100 && !npc.converted) {
+    available.push({ text:'\u2728 Share the Gospel — invite to faith', disabled:false, exec:() => {
+      closeChoices();
+      npc.converted = true;
+      S.faith = Math.min(100, S.faith + 20);
+      S.trust += 10;
+      updateHUD();
+      showDialogue(npc.name, npc.name + ' bows their head. "I believe. Thank you for your patience and love all these months." A life transformed.', '\u271D\uFE0F Converted!');
+      // Check if all NPCs converted
+      const origClose2 = closeDialogue;
+      closeDialogue = () => {
+        S.dialogueOpen = false;
+        dialogueEl.style.display = 'none';
+        closeDialogue = origClose2;
+        checkAllConverted();
+      };
+    }});
+  }
+  // Show "already converted" note
+  if (npc.converted) {
+    available.push({ text:'\u271D\uFE0F Pray together (fellow believer)', disabled:false, exec:() => {
+      closeChoices();
+      S.faith = Math.min(100, S.faith + 10);
+      S.energy += 5;
+      updateHUD();
+      showDialogue(npc.name, '"Let us pray together, my friend." You share a moment of fellowship.', '\u271D\uFE0F Brothers/sisters in faith');
+    }});
+  }
+  // Beg for money (always available, costs trust)
+  available.push({ text:'\uD83D\uDE4F Ask for money (trust -10)', disabled:false, exec:() => {
+    closeChoices();
+    const amount = 10 + Math.floor(Math.random() * 30);
+    npc.trust = Math.max(0, npc.trust - 10);
+    S.money += amount;
+    S.trust = Math.max(0, S.trust - 5);
+    S.faith = Math.max(0, S.faith - 5);
+    const fill = npc.el.querySelector('.n-trust-fill');
+    if (fill) fill.style.width = npc.trust + '%';
+    updateHUD();
+    const responses = [
+      npc.name + ' hesitates, then hands you ' + amount + '\u20BA. "Are you okay, friend?"',
+      npc.name + ' frowns slightly but gives you ' + amount + '\u20BA. The mood shifts.',
+      '"Here..." ' + npc.name + ' gives ' + amount + '\u20BA but looks uncomfortable.'
+    ];
+    showDialogue(npc.name, responses[Math.floor(Math.random()*responses.length)], '\u2764\uFE0F Trust: '+npc.trust+'% (-10)');
+  }});
   S.choicesOpen = true;
   choicesEl.style.display = 'block';
-  document.getElementById('cTitle').textContent = 'Talk to ' + npc.name;
+  document.getElementById('cTitle').textContent = 'Talk to ' + npc.name + (npc.converted ? ' \u271D\uFE0F' : '');
   const cont = document.getElementById('cContainer');
   cont.innerHTML = '';
   available.forEach(c => {
@@ -1478,6 +1695,27 @@ function showNpcChoices(npc) {
     else { btn.textContent=c.text; btn.onclick=c.exec; }
     cont.appendChild(btn);
   });
+}
+
+function checkAllConverted() {
+  const allConverted = npcData.every(n => n.converted);
+  if (allConverted) {
+    setTimeout(() => { triggerVictory(); }, 500);
+  }
+}
+
+function triggerVictory() {
+  const endEl = document.getElementById('endScreen');
+  endEl.style.display = 'flex';
+  document.getElementById('finalStats').innerHTML =
+    '<div class="srow"><span>Days Taken</span><span>'+S.day+'</span></div>'+
+    '<div class="srow"><span>All NPCs Converted</span><span>'+npcData.length+'/'+npcData.length+'</span></div>'+
+    '<div class="srow"><span>Turkish Level</span><span>'+Math.min(100,S.language)+'%</span></div>'+
+    '<div class="srow"><span>Faith</span><span>'+S.faith+'</span></div>'+
+    '<div class="srow"><span>People Helped</span><span>'+S.helped+'</span></div>'+
+    '<div class="srow"><span>Money Remaining</span><span>'+S.money+'\u20BA</span></div>';
+  document.getElementById('endMsg').textContent = 'Job Well Done! Every soul you invested in has come to faith. Your patience, love, and sacrifice bore eternal fruit.';
+  document.querySelector('#endScreen h2').textContent = '\u2728 Job Well Done! \u2728';
 }
 
 // ===== PROXIMITY CHECK =====
@@ -1595,22 +1833,57 @@ function gameLoop() {
   } else {
     S.sprintEnergyTimer = 0;
   }
-  // Collapse if energy hits 0
-  if (S.energy <= 0 && !S._collapsed) {
-    triggerCollapse();
-    return;
+  // Health drain when energy or hunger is 0
+  if ((S.energy <= 0 || S.hunger <= 0) && !S._collapsed) {
+    S._healthDrainTimer = (S._healthDrainTimer || 0) + 1;
+    if (S._healthDrainTimer >= 40) { // drain 1 health every ~40 frames (~0.67s)
+      S._healthDrainTimer = 0;
+      S.health = Math.max(0, S.health - 2);
+      updateHUD();
+      if (S.health <= 0) {
+        triggerDeath();
+        return;
+      }
+    }
+  } else {
+    S._healthDrainTimer = 0;
   }
-  const curSpeed = S.sprinting ? S.sprintSpeed : S.speed;
+  const vehicleSpeed = 10;
+  const curSpeed = S.riding ? vehicleSpeed : (S.sprinting ? S.sprintSpeed : S.speed);
   if (keys['ArrowLeft'] || keys['KeyA']) { S.vx = -curSpeed; S.facing = 'left'; moving = true; }
   else if (keys['ArrowRight'] || keys['KeyD']) { S.vx = curSpeed; S.facing = 'right'; moving = true; }
   else { S.vx *= 0.7; S.sprinting = false; }
   if (Math.abs(S.vx) < 0.3) S.vx = 0;
   S.x += S.vx;
-  S.x = Math.max(20, Math.min(zones[S.zone].width - 60, S.x));
+  // Zone transition when riding vehicle to edge
+  if (S.riding) {
+    const zoneW = zones[S.zone].width;
+    if (S.x >= zoneW - 30) {
+      if (S.zone === 'home') {
+        const destX = 60;
+        loadZoneRiding('city', destX);
+        return;
+      }
+    } else if (S.x <= 20) {
+      if (S.zone === 'city') {
+        const destX = zones['home'].width - 80;
+        loadZoneRiding('home', destX);
+        return;
+      }
+    }
+  }
+  S.x = Math.max(20, Math.min(zones[S.zone].width - (S.riding ? 20 : 60), S.x));
   playerEl.style.left = S.x + 'px';
+  // Update vehicle position if riding
+  if (S.riding) {
+    const pv = worldEl.querySelector('.parked-vehicle');
+    if (pv) pv.style.left = (S.x - 8) + 'px';
+  }
   const dancing = keys['ArrowDown'] || keys['KeyS'];
-  if (dancing) {
+  if (dancing && !S.riding) {
     playerEl.className = 'dancing';
+  } else if (S.riding) {
+    playerEl.className = 'riding';
   } else {
     playerEl.className = moving ? (S.sprinting ? 'running' : 'walking') : 'idle';
   }
@@ -1640,6 +1913,20 @@ document.addEventListener('keydown', e => {
     if (S.dialogueOpen) { closeDialogue(); e.preventDefault(); }
   }
   if ((e.code === 'ArrowUp' || e.code === 'KeyE' || e.code === 'KeyW') && S.started && !S.dialogueOpen && !S.choicesOpen && !S.traveling) {
+    // Dismount vehicle
+    if (S.riding) {
+      dismountVehicle();
+      return;
+    }
+    // Check if near parked vehicle to mount
+    const pv = worldEl.querySelector('.parked-vehicle');
+    if (pv && S.ownedVehicle && !S.riding) {
+      const pvX = parseInt(pv.style.left) || 0;
+      if (Math.abs(S.x - pvX) < 60) {
+        mountVehicle();
+        return;
+      }
+    }
     const { nearBuilding, nearNpc, nearTaxi } = checkProximity();
     if (nearTaxi) {
       const dest = S.zone === 'home' ? 'city' : 'home';
@@ -1737,6 +2024,13 @@ function initTouch() {
     e.preventDefault();
     if (S.dialogueOpen) { closeDialogue(); return; }
     if (S.choicesOpen || S.traveling) return;
+    // Vehicle mount/dismount
+    if (S.riding) { dismountVehicle(); return; }
+    const pv = worldEl.querySelector('.parked-vehicle');
+    if (pv && S.ownedVehicle && !S.riding) {
+      const pvX = parseInt(pv.style.left) || 0;
+      if (Math.abs(S.x - pvX) < 60) { mountVehicle(); return; }
+    }
     const { nearBuilding, nearNpc, nearTaxi } = checkProximity();
     if (nearTaxi) showTravelChoices(S.zone==='home'?'city':'home');
     else if (nearNpc) interactNpc(nearNpc);
@@ -1955,17 +2249,37 @@ function buyItem(key) {
   showJournal('Bought ' + item.name + '!');
 }
 
-// ===== HOSPITAL / COLLAPSE =====
+// ===== HOSPITAL / DEATH =====
 const hospitalBill = 150;
 
-function triggerCollapse() {
+function triggerDeath() {
   S._collapsed = true;
-  S.traveling = true; // freeze game
-  // Player falls down animation
+  S.traveling = true;
   playerEl.style.transition = 'transform 0.5s';
   playerEl.style.transform = 'rotate(90deg)';
   playerEl.className = 'idle';
-  // Show hospital overlay after a delay
+  setTimeout(() => {
+    playerEl.style.transition = '';
+    playerEl.style.transform = '';
+    // Show game over screen
+    const endEl = document.getElementById('endScreen');
+    endEl.style.display = 'flex';
+    document.querySelector('#endScreen h2').textContent = '\u2620\uFE0F Game Over';
+    document.getElementById('finalStats').innerHTML =
+      '<div class="srow"><span>Days Survived</span><span>'+S.day+'</span></div>'+
+      '<div class="srow"><span>NPCs Converted</span><span>'+npcData.filter(n=>n.converted).length+'/'+npcData.length+'</span></div>'+
+      '<div class="srow"><span>Turkish Level</span><span>'+Math.min(100,S.language)+'%</span></div>'+
+      '<div class="srow"><span>People Helped</span><span>'+S.helped+'</span></div>';
+    document.getElementById('endMsg').textContent = 'Your health reached zero. Take care of your body — eat, rest, and visit the hospital when needed.';
+  }, 1500);
+}
+
+function triggerCollapse() {
+  S._collapsed = true;
+  S.traveling = true;
+  playerEl.style.transition = 'transform 0.5s';
+  playerEl.style.transform = 'rotate(90deg)';
+  playerEl.className = 'idle';
   setTimeout(() => {
     playerEl.style.transition = '';
     playerEl.style.transform = '';
@@ -1978,11 +2292,11 @@ function payHospitalBill() {
   S.money -= hospitalBill;
   if (S.money < 0) S.money = 0;
   S.energy = 100;
+  S.health = 100;
   S.hunger = Math.min(100, S.hunger + 20);
   S._collapsed = false;
   S.traveling = false;
   document.getElementById('hospitalOverlay').style.display = 'none';
-  // Move player to hospital if in city, or home
   if (S.zone === 'city') {
     S.x = 3550;
     playerEl.style.left = S.x + 'px';
