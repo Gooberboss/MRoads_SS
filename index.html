@@ -323,7 +323,19 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 .deco-lamp{position:absolute;bottom:130px;width:6px;height:60px;background:linear-gradient(180deg,#ffd166,#333);border-radius:3px;pointer-events:none;z-index:2}
 .deco-lamp::before{content:'';position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:12px}
 .deco-cat{position:absolute;bottom:132px;font-size:14px;pointer-events:none;z-index:3;animation:catIdle 3s ease-in-out infinite}
+.deco-cat.scared-left{animation:catScareL .6s ease-out forwards}
+.deco-cat.scared-right{animation:catScareR .6s ease-out forwards}
 @keyframes catIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes catScareL{
+  0%{transform:translateX(0) translateY(0)}
+  40%{transform:translateX(-30px) translateY(-60px)}
+  100%{transform:translateX(-50px) translateY(0)}
+}
+@keyframes catScareR{
+  0%{transform:translateX(0) translateY(0)}
+  40%{transform:translateX(30px) translateY(-60px)}
+  100%{transform:translateX(50px) translateY(0)}
+}
 
 /* CSS Cars */
 .deco-car{position:absolute;bottom:30px;width:64px;height:28px;pointer-events:none;z-index:1;animation:carDrive linear infinite}
@@ -397,6 +409,10 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 .b-lot-cars{position:absolute;bottom:4px;left:8px;right:8px;display:flex;gap:6px;justify-content:center;pointer-events:none}
 .b-lot-cars::before{content:'';display:inline-block;width:20px;height:10px;background:#e74c3c;border-radius:2px 4px 1px 1px;border-bottom:2px solid rgba(0,0,0,.2)}
 .b-lot-cars::after{content:'';display:inline-block;width:20px;height:10px;background:#3498db;border-radius:2px 4px 1px 1px;border-bottom:2px solid rgba(0,0,0,.2)}
+/* Hospital cross */
+.b-hosp-cross{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:16px;height:16px;pointer-events:none}
+.b-hosp-cross::before{content:'';position:absolute;top:5px;left:0;width:16px;height:6px;background:#e74c3c;border-radius:1px}
+.b-hosp-cross::after{content:'';position:absolute;top:0;left:5px;width:6px;height:16px;background:#e74c3c;border-radius:1px}
 </style>
 </head>
 <body>
@@ -436,6 +452,18 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 <div class="taxi-anim">🚕</div>
 <div class="travel-text" id="travelText">Traveling...</div>
 <div class="travel-sub" id="travelSub">-20₺ taxi fare</div>
+</div>
+
+<div id="hospitalOverlay" style="display:none;position:absolute;inset:0;z-index:49;background:rgba(0,0,0,.95);color:#fff;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px">
+<div style="font-size:48px;margin-bottom:16px">&#128656;</div>
+<h2 style="color:#e74c3c;margin-bottom:8px">You collapsed!</h2>
+<p style="color:#ccc;margin-bottom:6px;max-width:400px">You ran out of energy and fell unconscious. A passerby called an ambulance.</p>
+<p style="color:#a8dadc;margin-bottom:20px;font-size:13px">You wake up in the hospital...</p>
+<div id="hospBill" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:16px 24px;margin-bottom:20px">
+<p style="color:#ffd166;font-weight:bold;margin-bottom:8px">Hospital Bill: <span id="hospCost">150</span>&#8378;</p>
+<p style="font-size:12px;color:#888">Your energy will be fully restored.</p>
+</div>
+<button class="btn-p" onclick="payHospitalBill()" style="padding:12px 30px">Pay &amp; Leave</button>
 </div>
 
 <div id="upgradeShop">
@@ -522,7 +550,7 @@ let camX = 0;
 // Zone configs
 const zones = {
   home: { width: 1100, startX: 250 },
-  city: { width: 3900, startX: 200 }
+  city: { width: 4400, startX: 200 }
 };
 
 // ===== BUILDINGS PER ZONE =====
@@ -537,13 +565,14 @@ const buildingsCity = [
   {id:'communityCenter',x:1500,w:220,h:160,color:'linear-gradient(180deg,#28a745,#1e7e34,#155724)',emoji:'\uD83E\uDD1D',name:'Community Center',sub:'Toplum Merkezi'},
   {id:'park',x:2000,w:260,h:80,color:'linear-gradient(180deg,#a8e6cf 0%,#7bc8a4 50%,#4a9e6e 100%)',emoji:'\u26F2',name:'City Park',sub:'\u015Eehir Park\u0131'},
   {id:'refugeeCenter',x:2500,w:200,h:140,color:'linear-gradient(180deg,#f1c40f,#d4ac0d,#9a7d0a)',emoji:'\uD83C\uDFE5',name:'Refugee Center',sub:'M\u00FClteci Merkezi'},
-  {id:'dealership',x:3000,w:240,h:130,color:'linear-gradient(180deg,#4a6fa5,#34495e,#2c3e50)',emoji:'\uD83D\uDE97',name:'Car Dealership',sub:'Oto Galeri'}
+  {id:'dealership',x:3000,w:240,h:130,color:'linear-gradient(180deg,#4a6fa5,#34495e,#2c3e50)',emoji:'\uD83D\uDE97',name:'Car Dealership',sub:'Oto Galeri'},
+  {id:'hospital',x:3500,w:220,h:160,color:'linear-gradient(180deg,#ecf0f1,#bdc3c7,#95a5a6)',emoji:'\uD83C\uDFE5',name:'Hospital',sub:'Hastane'}
 ];
 
 // Taxi stands (multiple per zone)
 const taxiStands = {
   home: [{x:880, label:'Taxi to City Center (-20\u20BA)'}],
-  city: [{x:100, label:'Taxi Home (-20\u20BA)'},{x:3500, label:'Taxi Home (-20\u20BA)'}]
+  city: [{x:100, label:'Taxi Home (-20\u20BA)'},{x:4000, label:'Taxi Home (-20\u20BA)'}]
 };
 
 // ===== APARTMENT UPGRADE SYSTEM =====
@@ -633,6 +662,12 @@ const locData = {
     {text:'Browse vehicles',effect:()=>{openVehicleShop()},result:''},
     {text:'Sell your vehicle',effect:()=>{sellVehicle()},result:''},
     {text:'Just looking around',effect:()=>{S.energy-=2},result:'The salesman nods. "Take your time, friend."'}
+  ]},
+  hospital:{title:'At the Hospital...',choices:[
+    {text:'Rest in waiting room (+10 energy)',effect:()=>{S.energy=Math.min(100,S.energy+10)},result:'You sit and rest for a while. A little energy returns.'},
+    {text:'See a doctor (-200\u20BA, full energy)',effect:()=>{S.money-=200;S.energy=100;S.hunger=Math.min(100,S.hunger+30)},result:'The doctor checks you over. "Rest more, eat well." You feel fully restored.'},
+    {text:'Buy medicine (-50\u20BA, +30 energy)',effect:()=>{S.money-=50;S.energy=Math.min(100,S.energy+30)},result:'Some vitamins and rest. You feel better.'},
+    {text:'Leave',effect:()=>{},result:''}
   ]}
 };
 
@@ -883,6 +918,11 @@ function getBuildingDetails(id) {
         '<div class="b-windows"><div class="b-win" style="width:28px;height:24px;border-radius:2px;background:rgba(135,206,235,.5)"></div><div class="b-win" style="width:28px;height:24px;border-radius:2px;background:rgba(135,206,235,.5)"></div><div class="b-win" style="width:28px;height:24px;border-radius:2px;background:rgba(135,206,235,.5)"></div></div>'+
         '<div class="b-door" style="background:rgba(44,62,80,.6);width:30px;height:34px;border-radius:2px"></div>'+
         '<div class="b-lot-cars"></div>';
+    case 'hospital':
+      return '<div class="b-roof" style="background:#7f8c8d;height:10px"></div>'+
+        '<div class="b-hosp-cross"></div>'+
+        '<div class="b-windows"><div class="b-win" style="background:rgba(135,206,235,.4)"></div><div class="b-win" style="background:rgba(135,206,235,.4)"></div><div class="b-win" style="background:rgba(135,206,235,.4)"></div><div class="b-win" style="background:rgba(135,206,235,.4)"></div></div>'+
+        '<div class="b-door" style="background:rgba(44,62,80,.5);width:28px;height:34px;border-radius:2px"></div>';
     default:
       return '';
   }
@@ -1481,6 +1521,22 @@ function checkProximity() {
       else n.el.classList.add('idle');
     }
   });
+  // Scare cats if player is dancing near them
+  if (playerDancing) {
+    worldEl.querySelectorAll('.deco-cat:not(.scared-left):not(.scared-right)').forEach(cat => {
+      const catX = parseInt(cat.style.left) || 0;
+      if (Math.abs(S.x - catX) < 60) {
+        const dir = (S.x > catX) ? 'scared-left' : 'scared-right';
+        cat.classList.add(dir);
+        setTimeout(() => {
+          // Update position and return to idle
+          const offset = dir === 'scared-left' ? -50 : 50;
+          cat.style.left = (catX + offset) + 'px';
+          cat.classList.remove(dir);
+        }, 650);
+      }
+    });
+  }
   return { nearBuilding, nearNpc, nearTaxi };
 }
 
@@ -1538,6 +1594,11 @@ function gameLoop() {
     }
   } else {
     S.sprintEnergyTimer = 0;
+  }
+  // Collapse if energy hits 0
+  if (S.energy <= 0 && !S._collapsed) {
+    triggerCollapse();
+    return;
   }
   const curSpeed = S.sprinting ? S.sprintSpeed : S.speed;
   if (keys['ArrowLeft'] || keys['KeyA']) { S.vx = -curSpeed; S.facing = 'left'; moving = true; }
@@ -1892,6 +1953,47 @@ function buyItem(key) {
   renderShop();
   document.getElementById('hInvCount').textContent = S.inventory.length;
   showJournal('Bought ' + item.name + '!');
+}
+
+// ===== HOSPITAL / COLLAPSE =====
+const hospitalBill = 150;
+
+function triggerCollapse() {
+  S._collapsed = true;
+  S.traveling = true; // freeze game
+  // Player falls down animation
+  playerEl.style.transition = 'transform 0.5s';
+  playerEl.style.transform = 'rotate(90deg)';
+  playerEl.className = 'idle';
+  // Show hospital overlay after a delay
+  setTimeout(() => {
+    playerEl.style.transition = '';
+    playerEl.style.transform = '';
+    document.getElementById('hospitalOverlay').style.display = 'flex';
+    document.getElementById('hospCost').textContent = hospitalBill;
+  }, 1500);
+}
+
+function payHospitalBill() {
+  S.money -= hospitalBill;
+  if (S.money < 0) S.money = 0;
+  S.energy = 100;
+  S.hunger = Math.min(100, S.hunger + 20);
+  S._collapsed = false;
+  S.traveling = false;
+  document.getElementById('hospitalOverlay').style.display = 'none';
+  // Move player to hospital if in city, or home
+  if (S.zone === 'city') {
+    S.x = 3550;
+    playerEl.style.left = S.x + 'px';
+  } else {
+    S.x = zones[S.zone].startX;
+    playerEl.style.left = S.x + 'px';
+  }
+  updateCamera();
+  updateHUD();
+  showJournal('You wake up in the hospital. Take better care of yourself!');
+  requestAnimationFrame(gameLoop);
 }
 
 // ===== START =====
