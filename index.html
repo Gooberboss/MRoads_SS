@@ -25,6 +25,9 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:#1a1a2e;-w
 #mountains{position:absolute;top:22%;left:0;height:20%;width:200%;opacity:.5;
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 200'%3E%3Cpath d='M0,200 L0,120 Q100,60 200,100 Q350,40 500,90 Q600,50 700,80 Q850,30 1000,100 Q1100,70 1200,110 L1200,200Z' fill='%23a0845c' opacity='0.6'/%3E%3Cpath d='M0,200 L0,140 Q150,90 300,130 Q450,80 600,120 Q750,70 900,110 Q1050,80 1200,130 L1200,200Z' fill='%23b8956a' opacity='0.7'/%3E%3C/svg%3E") repeat-x;
   background-size:1200px 100%}
+#cityscape{position:absolute;top:34%;left:0;height:14%;width:200%;opacity:.25;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 150'%3E%3Crect x='30' y='50' width='40' height='100' fill='%23c4a882'/%3E%3Crect x='80' y='30' width='55' height='120' fill='%23b89878'/%3E%3Crect x='85' y='15' width='45' height='20' fill='%23b89878' rx='22 22 0 0'/%3E%3Crect x='150' y='60' width='35' height='90' fill='%23d4b896'/%3E%3Crect x='200' y='40' width='50' height='110' fill='%23c0a070'/%3E%3Cellipse cx='320' cy='35' rx='30' ry='25' fill='%23c4a882'/%3E%3Crect x='290' y='35' width='60' height='115' fill='%23c4a882'/%3E%3Crect x='285' y='20' width='5' height='60' fill='%23b89070'/%3E%3Crect x='355' y='20' width='5' height='60' fill='%23b89070'/%3E%3Crect x='380' y='55' width='45' height='95' fill='%23d4b896'/%3E%3Crect x='440' y='35' width='60' height='115' fill='%23c0a070'/%3E%3Crect x='520' y='65' width='35' height='85' fill='%23b89878'/%3E%3Crect x='570' y='45' width='50' height='105' fill='%23c4a882'/%3E%3Crect x='640' y='55' width='40' height='95' fill='%23d4b896'/%3E%3Cellipse cx='740' cy='30' rx='25' ry='22' fill='%23b89070'/%3E%3Crect x='715' y='30' width='50' height='120' fill='%23b89070'/%3E%3Crect x='710' y='18' width='4' height='55' fill='%23a88060'/%3E%3Crect x='768' y='18' width='4' height='55' fill='%23a88060'/%3E%3Crect x='790' y='50' width='55' height='100' fill='%23c0a070'/%3E%3Crect x='860' y='70' width='35' height='80' fill='%23c4a882'/%3E%3Crect x='910' y='40' width='50' height='110' fill='%23d4b896'/%3E%3Crect x='980' y='60' width='40' height='90' fill='%23b89878'/%3E%3Crect x='1040' y='35' width='55' height='115' fill='%23c0a070'/%3E%3Cellipse cx='1150' cy='32' rx='28' ry='23' fill='%23c4a882'/%3E%3Crect x='1122' y='32' width='56' height='118' fill='%23c4a882'/%3E%3Crect x='1117' y='18' width='5' height='55' fill='%23b89070'/%3E%3Crect x='1183' y='18' width='5' height='55' fill='%23b89070'/%3E%3Crect x='1200' y='55' width='45' height='95' fill='%23d4b896'/%3E%3Crect x='1260' y='45' width='50' height='105' fill='%23b89878'/%3E%3Crect x='1330' y='65' width='40' height='85' fill='%23c0a070'/%3E%3Crect x='1390' y='50' width='55' height='100' fill='%23c4a882'/%3E%3Crect x='1460' y='60' width='40' height='90' fill='%23d4b896'/%3E%3Crect x='1520' y='40' width='50' height='110' fill='%23b89878'/%3E%3C/svg%3E") repeat-x;
+  background-size:1600px 100%}
 #worldWrap{position:absolute;bottom:0;left:0;right:0;height:62%;overflow:hidden}
 #world{position:absolute;bottom:0;left:0;width:5000px;height:100%}
 #ground{position:absolute;bottom:0;left:0;width:100%;height:100px;
@@ -404,11 +407,15 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 .pv-win-r{position:absolute;bottom:20px;left:27px;width:11px;height:9px;background:rgba(30,60,90,.7);border-radius:2px 2px 0 0;border:1px solid rgba(0,0,0,.2)}
 .pv-wheel{position:absolute;bottom:1px;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle,#888 28%,#333 30%,#333 58%,#222 60%);border:2px solid #1a1a1a}
 .pv-wh-f{left:5px}.pv-wh-r{right:5px}
-.pv-scooter{width:30px;height:24px;border-radius:4px 8px 2px 2px;position:relative}
-.pv-scooter::before{content:'';position:absolute;bottom:0;left:4px;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,#888 30%,#333 32%,#222 60%);border:2px solid #1a1a1a}
-.pv-scooter::after{content:'';position:absolute;bottom:0;right:4px;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle,#888 30%,#333 32%,#222 60%);border:2px solid #1a1a1a}
+.pv-scooter{width:36px;height:20px;position:relative}
+.pv-sc-body{position:absolute;bottom:8px;left:6px;width:22px;height:10px;border-radius:3px 8px 2px 2px}
+.pv-sc-handle{position:absolute;bottom:14px;left:4px;width:2px;height:10px;border-left:3px solid;border-radius:2px}
+.pv-scooter::before{content:'';position:absolute;bottom:2px;left:2px;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,#888 28%,#333 30%,#333 58%,#222 60%);border:2px solid #1a1a1a}
+.pv-scooter::after{content:'';position:absolute;bottom:2px;right:6px;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,#888 28%,#333 30%,#333 58%,#222 60%);border:2px solid #1a1a1a}
 /* Vehicle preview in shop */
 .vc-preview{display:inline-block;width:28px;height:14px;border-radius:3px 5px 2px 2px;border-bottom:2px solid rgba(0,0,0,.2)}
+/* Outfit preview */
+.outfit-preview{display:inline-block;width:16px;height:22px;border-radius:4px 4px 2px 2px;border-bottom:2px solid rgba(0,0,0,.15)}
 /* Dealership lot cars */
 .b-lot-cars{position:absolute;bottom:4px;left:8px;right:8px;display:flex;gap:6px;justify-content:center;pointer-events:none}
 .b-lot-cars::before{content:'';display:inline-block;width:20px;height:10px;background:#e74c3c;border-radius:2px 4px 1px 1px;border-bottom:2px solid rgba(0,0,0,.2)}
@@ -423,6 +430,7 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 <div id="game">
 <div id="sky" class="sky-morning"></div>
 <div id="mountains"></div>
+<div id="cityscape"></div>
 <div id="weatherLayer"></div>
 <div id="worldWrap"><div id="world">
 <div id="sidewalk"></div>
@@ -507,6 +515,17 @@ button:hover{transform:scale(1.03)}button:active{transform:scale(.97)}
 </div>
 </div>
 
+<div id="clothesShop" style="display:none;position:absolute;inset:0;z-index:48;background:rgba(10,10,30,.95);color:#fff;flex-direction:column;align-items:center;padding:0;overflow:hidden">
+<div style="width:100%;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.1);flex-shrink:0">
+<div><h2 style="font-size:1.3rem;color:#ffd166;margin:0">&#128085; Clothes Shop</h2><p style="font-size:.8rem;color:#a8dadc;margin:2px 0 0">Buy and wear Turkish outfits</p></div>
+<button class="btn-p" style="padding:8px 18px;font-size:12px" onclick="closeClothesShop()">Close</button>
+</div>
+<div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 20px;width:100%;display:flex;flex-direction:column;align-items:center">
+<div id="clothesBalance" style="margin:8px 0;font-size:14px;color:#eee"></div>
+<div class="upgrade-grid" id="clothesGrid"></div>
+</div>
+</div>
+
 <div id="dialogue"><div id="dSpeaker"></div><div id="dText"></div><div id="dTrust"></div><button class="btn-p" onclick="closeDialogue()">Continue</button></div>
 <div id="choices"><div id="cTitle"></div><div id="cContainer"></div></div>
 <div id="journal"></div>
@@ -546,7 +565,8 @@ const S = {
   vehicleX: 0, // parked vehicle position
   inventory: [], // array of item objects
   sprintEnergyTimer: 0,
-  zoom: 1 // camera zoom level
+  zoom: 1, // camera zoom level
+  outfit: 'default' // current outfit id
 };
 const timeSlots = ['Morning','Afternoon','Evening'];
 const timeEmojis = ['\u2600\uFE0F','\uD83C\uDF24\uFE0F','\uD83C\uDF19'];
@@ -616,6 +636,16 @@ const shopItems = {
   toys: {id:'toys',name:'Children\'s Toys',emoji:'\uD83E\uDDF8',cost:60,type:'donation',helpBonus:2,trustBonus:3,desc:'Toys for refugee children.'}
 };
 
+// ===== OUTFITS =====
+const outfits = {
+  'default': {id:'default',name:'Casual Clothes',bodyColor:'#4a90d9',footColor:'#333',desc:'Your everyday blue shirt.',cost:0,owned:true,trustBonus:0},
+  'shalvar': {id:'shalvar',name:'\u015Ealvar Outfit',bodyColor:'#8B4513',footColor:'#5c3317',desc:'Traditional baggy trousers and vest. Locals appreciate the effort. +3 trust per interaction.',cost:120,owned:false,trustBonus:3},
+  'suit': {id:'suit',name:'Business Suit',bodyColor:'#2c3e50',footColor:'#1a1a2a',desc:'A sharp suit. Good for teaching English. +2 trust.',cost:200,owned:false,trustBonus:2},
+  'kaftan': {id:'kaftan',name:'Kaftan Robe',bodyColor:'#8e44ad',footColor:'#4a235a',desc:'An elegant Ottoman-style kaftan. Very respectful. +5 trust.',cost:350,owned:false,trustBonus:5},
+  'worker': {id:'worker',name:'Worker Clothes',bodyColor:'#6b8e23',footColor:'#3d5c14',desc:'Practical clothes for volunteering. +2 helped per action.',cost:100,owned:false,helpBonus:2},
+  'white': {id:'white',name:'White Linen',bodyColor:'#f5f5f5',footColor:'#ddd',desc:'Clean white linen. Peaceful and approachable. +3 faith.',cost:150,owned:false,faithBonus:3}
+};
+
 // ===== LOCATIONS (interactions) =====
 const locData = {
   apartment:{title:'Back at home...',choices:[
@@ -639,7 +669,7 @@ const locData = {
   ]},
   bazaar:{title:'At the Bazaar...',choices:[
     {text:'\uD83D\uDED2 Browse Shop (buy items)',effect:()=>{openShop()},result:''},
-    {text:'Buy groceries (-80\u20BA)',effect:()=>{S.language+=8;S.trust+=8;S.energy-=8;S.money-=80;S.hunger=Math.min(100,S.hunger+20)},result:'\u201CYou are getting better!\u201D the vendor laughs.'},
+    {text:'\uD83D\uDC55 Buy Clothes',effect:()=>{openClothesShop()},result:''},
     {text:'Buy food to share (-150\u20BA)',effect:()=>{S.trust+=15;S.energy-=8;S.money-=150;S.helped+=1},result:'Hospitality costs money but builds deep bonds.'},
     {text:'Help a lost tourist',effect:()=>{S.helped+=1;S.trust+=5;S.energy-=5},result:'A shopkeeper nods approvingly.'},
     {text:'Caf\u00E9 and people-watch (-20\u20BA)',effect:()=>{S.energy-=3;S.faith+=5;S.money-=20},result:'You pray quietly for the people passing by.'}
@@ -1235,7 +1265,7 @@ function showParkedVehicle() {
   const el = document.createElement('div');
   el.className = 'parked-vehicle';
   if (v.type === 'scooter') {
-    el.innerHTML = '<div class="pv-scooter" style="background:'+v.color+'"></div>';
+    el.innerHTML = '<div class="pv-scooter"><div class="pv-sc-body" style="background:'+v.color+'"></div><div class="pv-sc-handle" style="border-color:'+v.color+'"></div></div>';
   } else {
     el.innerHTML = '<div class="pv-car"><div class="pv-body" style="background:'+v.color+'"></div>'+
       '<div class="pv-roof" style="background:'+v.color+';filter:brightness(.85)"></div>'+
@@ -1250,12 +1280,11 @@ function showParkedVehicle() {
 function mountVehicle() {
   if (!S.ownedVehicle || S.riding) return;
   S.riding = true;
-  // Hide player feet, show riding state
+  S._rideBottom = 104;
   playerEl.style.bottom = '104px';
-  // Move vehicle to player position
   const pv = worldEl.querySelector('.parked-vehicle');
   if (pv) pv.style.left = (S.x - 8) + 'px';
-  showJournal('You got in your ' + vehicles[S.ownedVehicle].name + '. Drive to the edge to change zones!');
+  showJournal('You got in your ' + vehicles[S.ownedVehicle].name + '. Use \u2191\u2193 to switch lanes!');
   updateHUD();
 }
 
@@ -1263,10 +1292,11 @@ function dismountVehicle() {
   if (!S.riding) return;
   S.riding = false;
   S.vehicleX = S.x - 8;
+  S._rideBottom = 104;
   playerEl.style.bottom = '130px';
   // Park vehicle at current position
   const pv = worldEl.querySelector('.parked-vehicle');
-  if (pv) pv.style.left = S.vehicleX + 'px';
+  if (pv) { pv.style.left = S.vehicleX + 'px'; pv.style.bottom = '104px'; }
   showJournal('Parked your ' + vehicles[S.ownedVehicle].name + '.');
 }
 
@@ -1332,7 +1362,7 @@ function loadZoneRiding(zone, playerX) {
   const vel = document.createElement('div');
   vel.className = 'parked-vehicle';
   if (v.type === 'scooter') {
-    vel.innerHTML = '<div class="pv-scooter" style="background:'+v.color+'"></div>';
+    vel.innerHTML = '<div class="pv-scooter"><div class="pv-sc-body" style="background:'+v.color+'"></div><div class="pv-sc-handle" style="border-color:'+v.color+'"></div></div>';
   } else {
     vel.innerHTML = '<div class="pv-car"><div class="pv-body" style="background:'+v.color+'"></div>'+
       '<div class="pv-roof" style="background:'+v.color+';filter:brightness(.85)"></div>'+
@@ -1372,6 +1402,8 @@ function updateCamera() {
   worldEl.style.transform = 'translateX(' + (-camX) + 'px)';
   const mts = document.getElementById('mountains');
   if (mts) mts.style.transform = 'translateX(' + (-camX * 0.3 * S.zoom) + 'px) scale(' + (0.8 + S.zoom * 0.2) + ')';
+  const cs = document.getElementById('cityscape');
+  if (cs) cs.style.transform = 'translateX(' + (-camX * 0.5 * S.zoom) + 'px)';
 }
 
 function zoomIn() { S.zoom = Math.min(2, +(S.zoom + 0.15).toFixed(2)); updateCamera(); }
@@ -1619,9 +1651,9 @@ function showNpcChoices(npc) {
     const locked = npc.trust < c.min || (c.cost && S.money < c.cost);
     return { text:c.text, disabled:locked, exec:() => {
       closeChoices();
-      npc.trust = Math.min(100, npc.trust + (c.tG||0));
+      npc.trust = Math.min(100, npc.trust + (c.tG||0) + (outfits[S.outfit].trustBonus||0));
       S.energy += (c.e||0);
-      S.faith += (c.fG||0);
+      S.faith += (c.fG||0) + (outfits[S.outfit].faithBonus||0);
       S.trust += Math.round((c.tG||0)*0.5);
       if (c.cost) S.money -= c.cost;
       if (c.hG) S.helped += c.hG;
@@ -1814,11 +1846,46 @@ function checkDoubleTap(code, isRepeat) {
   lastTapTime = now;
 }
 
+// ===== VEHICLE COLLISION =====
+let collisionCooldown = 0;
+function checkVehicleCollision() {
+  if (collisionCooldown > 0) { collisionCooldown--; return; }
+  const cars = worldEl.querySelectorAll('.deco-car');
+  cars.forEach(car => {
+    const rect = car.getBoundingClientRect();
+    const playerRect = playerEl.getBoundingClientRect();
+    // Simple overlap check
+    if (playerRect.right > rect.left + 10 && playerRect.left < rect.right - 10 &&
+        playerRect.bottom > rect.top && playerRect.top < rect.bottom) {
+      // Collision!
+      collisionCooldown = 120; // ~2 seconds immunity
+      S.health = Math.max(0, S.health - 20);
+      S.energy = Math.max(0, S.energy - 15);
+      S.faith = Math.max(0, S.faith - 3);
+      // Knock player back
+      S.vx = S.facing === 'right' ? -8 : 8;
+      S.x += S.vx * 3;
+      updateHUD();
+      showJournal('\uD83D\uDCA5 Crash! You collided with a car. Health -20, Energy -15.');
+      // Check death
+      if (S.health <= 0) {
+        dismountVehicle();
+        triggerCollapse();
+      }
+    }
+  });
+}
+
 // ===== GAME LOOP =====
 function gameLoop() {
   if (!S.started || S.traveling) {
     requestAnimationFrame(gameLoop);
     return;
+  }
+  // Test mode: keep energy and money maxed
+  if (S._testMode) {
+    S.energy = 100;
+    if (S.money < 99999) S.money = 99999;
   }
   let moving = false;
   // Sprint energy drain
@@ -1841,7 +1908,7 @@ function gameLoop() {
       S.health = Math.max(0, S.health - 2);
       updateHUD();
       if (S.health <= 0) {
-        triggerDeath();
+        triggerCollapse();
         return;
       }
     }
@@ -1853,6 +1920,15 @@ function gameLoop() {
   if (keys['ArrowLeft'] || keys['KeyA']) { S.vx = -curSpeed; S.facing = 'left'; moving = true; }
   else if (keys['ArrowRight'] || keys['KeyD']) { S.vx = curSpeed; S.facing = 'right'; moving = true; }
   else { S.vx *= 0.7; S.sprinting = false; }
+  // Vertical movement when riding (switch between sidewalk and road)
+  if (S.riding) {
+    if (keys['ArrowDown'] || keys['KeyS']) {
+      S._rideBottom = Math.max(40, (S._rideBottom || 104) - 3);
+    } else if (keys['ArrowUp'] || keys['KeyW']) {
+      S._rideBottom = Math.min(104, (S._rideBottom || 104) + 3);
+    }
+    playerEl.style.bottom = (S._rideBottom || 104) + 'px';
+  }
   if (Math.abs(S.vx) < 0.3) S.vx = 0;
   S.x += S.vx;
   // Zone transition when riding vehicle to edge
@@ -1877,7 +1953,12 @@ function gameLoop() {
   // Update vehicle position if riding
   if (S.riding) {
     const pv = worldEl.querySelector('.parked-vehicle');
-    if (pv) pv.style.left = (S.x - 8) + 'px';
+    if (pv) {
+      pv.style.left = (S.x - 8) + 'px';
+      pv.style.bottom = ((S._rideBottom || 104) - 26) + 'px';
+    }
+    // Check collision with traffic cars
+    checkVehicleCollision();
   }
   const dancing = keys['ArrowDown'] || keys['KeyS'];
   if (dancing && !S.riding) {
@@ -1913,9 +1994,11 @@ document.addEventListener('keydown', e => {
     if (S.dialogueOpen) { closeDialogue(); e.preventDefault(); }
   }
   if ((e.code === 'ArrowUp' || e.code === 'KeyE' || e.code === 'KeyW') && S.started && !S.dialogueOpen && !S.choicesOpen && !S.traveling) {
-    // Dismount vehicle
+    // Dismount vehicle only when at sidewalk level (top position)
     if (S.riding) {
-      dismountVehicle();
+      if ((S._rideBottom || 104) >= 100) {
+        dismountVehicle();
+      }
       return;
     }
     // Check if near parked vehicle to mount
@@ -1940,6 +2023,21 @@ document.addEventListener('keydown', e => {
   if (e.code === 'Escape') {
     if (S.choicesOpen) closeChoices();
     if (S.dialogueOpen) closeDialogue();
+  }
+  // Test mode: Shift+T
+  if (e.code === 'KeyT' && e.shiftKey && S.started) {
+    S._testMode = !S._testMode;
+    if (S._testMode) {
+      S._savedMoney = S.money;
+      S._savedEnergy = S.energy;
+      S.money = 99999; S.energy = 100;
+      showJournal('\u26A0\uFE0F TEST MODE ON \u2014 Unlimited money & energy');
+    } else {
+      S.money = S._savedMoney;
+      S.energy = S._savedEnergy;
+      showJournal('Test mode OFF \u2014 Stats restored');
+    }
+    updateHUD();
   }
   if (e.code === 'Equal' || e.code === 'NumpadAdd') { zoomIn(); e.preventDefault(); }
   if (e.code === 'Minus' || e.code === 'NumpadSubtract') { zoomOut(); e.preventDefault(); }
@@ -1978,7 +2076,7 @@ function initTouch() {
     if (S.started && e.touches.length < 2) {
       // Allow scrolling inside overlay panels
       const t = e.target;
-      if (t.closest('#shopPanel,#inventoryPanel,#upgradeShop,#vehicleShop,#endScreen')) return;
+      if (t.closest('#shopPanel,#inventoryPanel,#upgradeShop,#vehicleShop,#clothesShop,#endScreen')) return;
       e.preventDefault();
     }
   }, {passive:false});
@@ -2025,7 +2123,7 @@ function initTouch() {
     if (S.dialogueOpen) { closeDialogue(); return; }
     if (S.choicesOpen || S.traveling) return;
     // Vehicle mount/dismount
-    if (S.riding) { dismountVehicle(); return; }
+    if (S.riding) { if ((S._rideBottom||104)>=100) dismountVehicle(); return; }
     const pv = worldEl.querySelector('.parked-vehicle');
     if (pv && S.ownedVehicle && !S.riding) {
       const pvX = parseInt(pv.style.left) || 0;
@@ -2249,30 +2347,71 @@ function buyItem(key) {
   showJournal('Bought ' + item.name + '!');
 }
 
+// ===== CLOTHES SHOP =====
+function openClothesShop() {
+  closeChoices();
+  document.getElementById('clothesShop').style.display = 'flex';
+  S.dialogueOpen = true;
+  renderClothesGrid();
+}
+function closeClothesShop() {
+  document.getElementById('clothesShop').style.display = 'none';
+  S.dialogueOpen = false;
+}
+function renderClothesGrid() {
+  const grid = document.getElementById('clothesGrid');
+  grid.innerHTML = '';
+  document.getElementById('clothesBalance').innerHTML = '\uD83D\uDCB0 Balance: <strong style="color:#06d6a0">' + S.money + '\u20BA</strong> &nbsp;|&nbsp; Wearing: <strong style="color:#ffd166">' + outfits[S.outfit].name + '</strong>';
+  Object.keys(outfits).forEach(key => {
+    const o = outfits[key];
+    const wearing = S.outfit === key;
+    const owned = o.owned;
+    const card = document.createElement('div');
+    card.className = 'upgrade-card' + (wearing ? ' owned' : '');
+    let bonusText = '';
+    if (o.trustBonus) bonusText += '+'+o.trustBonus+' trust ';
+    if (o.helpBonus) bonusText += '+'+o.helpBonus+' helped ';
+    if (o.faithBonus) bonusText += '+'+o.faithBonus+' faith ';
+    card.innerHTML = '<div class="uc-header"><span class="outfit-preview" style="background:'+o.bodyColor+'"></span><span class="uc-name">'+o.name+'</span></div>'+
+      '<div class="uc-desc">'+o.desc+'</div>'+
+      '<div class="uc-cost">'+(wearing ? '\u2705 Wearing' : owned ? 'Owned \u2014 tap to wear' : o.cost+'\u20BA')+'</div>'+
+      (bonusText ? '<div style="font-size:10px;color:#06d6a0;margin-top:4px">'+bonusText+'</div>' : '');
+    if (!wearing) {
+      card.onclick = () => {
+        if (owned) { wearOutfit(key); }
+        else { buyOutfit(key); }
+      };
+    }
+    grid.appendChild(card);
+  });
+}
+function buyOutfit(key) {
+  const o = outfits[key];
+  if (S.money < o.cost) { showJournal('Not enough money! Need '+o.cost+'\u20BA.'); return; }
+  S.money -= o.cost;
+  o.owned = true;
+  S.outfit = key;
+  applyOutfit();
+  updateHUD();
+  renderClothesGrid();
+  showJournal('Bought and wearing: ' + o.name + '!');
+}
+function wearOutfit(key) {
+  S.outfit = key;
+  applyOutfit();
+  renderClothesGrid();
+  showJournal('Now wearing: ' + outfits[key].name);
+}
+function applyOutfit() {
+  const o = outfits[S.outfit];
+  const body = playerEl.querySelector('.p-body');
+  const feet = playerEl.querySelectorAll('.p-foot');
+  if (body) body.style.background = o.bodyColor;
+  feet.forEach(f => f.style.background = o.footColor);
+}
+
 // ===== HOSPITAL / DEATH =====
 const hospitalBill = 150;
-
-function triggerDeath() {
-  S._collapsed = true;
-  S.traveling = true;
-  playerEl.style.transition = 'transform 0.5s';
-  playerEl.style.transform = 'rotate(90deg)';
-  playerEl.className = 'idle';
-  setTimeout(() => {
-    playerEl.style.transition = '';
-    playerEl.style.transform = '';
-    // Show game over screen
-    const endEl = document.getElementById('endScreen');
-    endEl.style.display = 'flex';
-    document.querySelector('#endScreen h2').textContent = '\u2620\uFE0F Game Over';
-    document.getElementById('finalStats').innerHTML =
-      '<div class="srow"><span>Days Survived</span><span>'+S.day+'</span></div>'+
-      '<div class="srow"><span>NPCs Converted</span><span>'+npcData.filter(n=>n.converted).length+'/'+npcData.length+'</span></div>'+
-      '<div class="srow"><span>Turkish Level</span><span>'+Math.min(100,S.language)+'%</span></div>'+
-      '<div class="srow"><span>People Helped</span><span>'+S.helped+'</span></div>';
-    document.getElementById('endMsg').textContent = 'Your health reached zero. Take care of your body — eat, rest, and visit the hospital when needed.';
-  }, 1500);
-}
 
 function triggerCollapse() {
   S._collapsed = true;
@@ -2289,8 +2428,22 @@ function triggerCollapse() {
 }
 
 function payHospitalBill() {
+  if (S.money < hospitalBill) {
+    // Can't afford — game over
+    document.getElementById('hospitalOverlay').style.display = 'none';
+    const endEl = document.getElementById('endScreen');
+    endEl.style.display = 'flex';
+    document.querySelector('#endScreen h2').textContent = '\u2620\uFE0F Game Over';
+    document.getElementById('finalStats').innerHTML =
+      '<div class="srow"><span>Days Survived</span><span>'+S.day+'</span></div>'+
+      '<div class="srow"><span>NPCs Converted</span><span>'+npcData.filter(n=>n.converted).length+'/'+npcData.length+'</span></div>'+
+      '<div class="srow"><span>Turkish Level</span><span>'+Math.min(100,S.language)+'%</span></div>'+
+      '<div class="srow"><span>People Helped</span><span>'+S.helped+'</span></div>'+
+      '<div class="srow"><span>Money</span><span>'+S.money+'\u20BA</span></div>';
+    document.getElementById('endMsg').textContent = 'You couldn\'t afford the hospital bill. Take care of your health and finances.';
+    return;
+  }
   S.money -= hospitalBill;
-  if (S.money < 0) S.money = 0;
   S.energy = 100;
   S.health = 100;
   S.hunger = Math.min(100, S.hunger + 20);
